@@ -1,0 +1,42 @@
+=======
+wavplay
+=======
+
+-----------------------------------------
+a C library to play WAV sound via OSS
+-----------------------------------------
+
+:Author: Zhihao Yuan <lichray@gmail.com>
+:Date:   2011-04-01
+:Copyright: 2-clause BSD License
+:Version: 0.2
+:Manual section: 3
+
+SYNOPSIS
+=========
+
+::
+
+ #include "wavplay.h"
+
+ void
+ wav_play(const char *filename);
+
+ int
+ snd_init(void);
+
+ void
+ snd_end(void);
+
+DESCRIPTION
+============
+
+The ``wav_play()`` function opens and plays a WAV sound file. If ``snd_init()`` is not called before, ``wav_play()`` will initialize the OSS sound device. Until the ``snd_end()`` is called manually or the program is quit, the device reminds open. 
+
+The default OSS device is `/dev/dsp`, which can be defined through the macro ``DEV_NODE``. For each call to ``wav_play()``, the device will be reseted; sound mixing is available if your OSS supports it.
+
+BUGS
+=====
+
+This library only supports standard, little-endian WAV file without a AIFF fact chunk.
+
