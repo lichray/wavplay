@@ -13,8 +13,6 @@
 #define BUF_SIZE 4096
 #define PERIOD   2
 
-#define FMT2BITS(fmt) ((fmt & (7<<3)) + 8)
-
 #if !defined(USE_ALSA)
 
 static int devfd = -1;
@@ -63,16 +61,14 @@ void snd_set(int format, int nchannels, int framerate) {
 	snd_pcm_hw_params_alloca(&params);
 	snd_pcm_hw_params_any(pcm, params);
 	snd_pcm_hw_params_set_access(pcm, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-	snd_pcm_hw_params_set_format(pcm, params, format);
+	snd_pcm_hw_params_set_format(pcm, params, format / 8);
 	snd_pcm_hw_params_set_channels(pcm, params, nchannels);
 	snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
 	snd_pcm_hw_params_set_periods(pcm, params, PERIOD, 0);
-	snd_pcm_hw_params_set_buffer_size(pcm, params, (BUF_SIZE * PERIOD) / 2);
 	snd_pcm_hw_params(pcm, params);
 }
 
 void snd_end(void) {
-	snd_pcm_drain(pcm);
 	snd_pcm_close(pcm);
 	pcm = NULL;
 }
@@ -81,12 +77,21 @@ void snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE * 2];
 	size_t i = 0;
 	if (pcm == NULL) snd_init();
-	snd_pcm_prepare(pcm);
+	snd_pcm_format_t format;
+	unsigned int nchannels;
+	snd_pcm_hw_params_t *params;
+	snd_pcm_hw_params_alloca(&params);
+	snd_pcm_hw_params_current(pcm, params);
+	snd_pcm_hw_params_get_format(params, &format);
+	snd_pcm_hw_params_get_channels(params, &nchannels);
 	while (!feof(fp)) {
 		fread(buf, sizeof(buf), 1, fp);
-		snd_pcm_writei(pcm, buf, BUF_SIZE / 2);
+		snd_pcm_prepare(pcm);
+		snd_pcm_writei(pcm, buf, (n - i < sizeof(buf) ? 
+				n - i : sizeof(buf)) / (format * nchannels));
 		i += sizeof(buf);
 	}
+	snd_pcm_drain(pcm);
 }
 
 #endif
