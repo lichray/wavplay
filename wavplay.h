@@ -2,7 +2,7 @@
 #define _WAVPLAY_H
 
 /*-
- * wavplay - a C library to play WAV sound via OSS
+ * wavplay - a C library to play WAV sound via OSS/ALSA
  *
  * Copyright (c) 2011 Zhihao Yuan.
  * All rights reserved.
@@ -44,6 +44,7 @@ typedef struct {
 
 int         snd_init(void);
 void        snd_end(void);
+void        snd_set(int format, int nchannels, int framerate);
 void        snd_play(FILE *stream, size_t size);
 wavfile_t * wav_open(const char *filename);
 void        wav_play(const char *filename);

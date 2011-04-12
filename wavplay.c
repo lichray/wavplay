@@ -1,5 +1,5 @@
 /*-
- * wavplay - a C library to play WAV sound via OSS
+ * wavplay - a C library to play WAV sound via OSS/ALSA
  *
  * Copyright (c) 2011 Zhihao Yuan.
  * All rights reserved.
@@ -17,6 +17,13 @@ int snd_init(void) {
 	if (devfd > -1) snd_end();
 	devfd = open(DEV_NODE, O_WRONLY);
 	return devfd;
+}
+
+void snd_set(int format, int nchannels, int framerate) {
+	ioctl(devfd, SNDCTL_DSP_RESET, NULL);
+	ioctl(devfd, SNDCTL_DSP_SETFMT, &format);
+	ioctl(devfd, SNDCTL_DSP_CHANNELS, &nchannels);
+	ioctl(devfd, SNDCTL_DSP_SPEED, &framerate);
 }
 
 void snd_end(void) {
@@ -44,13 +51,7 @@ wavfile_t * wav_open(const char *fn) {
 		wav = (wavfile_t*) malloc(sizeof(wavfile_t));
 		wav->stream = fp;
 		wav->size = header.nframes;
-		int val = header.format;
-		ioctl(devfd, SNDCTL_DSP_RESET, NULL);
-		ioctl(devfd, SNDCTL_DSP_SETFMT, &val);
-		val = header.nchannels;
-		ioctl(devfd, SNDCTL_DSP_CHANNELS, &val);
-		val = header.framerate;
-		ioctl(devfd, SNDCTL_DSP_SPEED, &val);
+		snd_set(header.format, header.nchannels, header.framerate);
 	}
 	return wav;
 }
