@@ -18,9 +18,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#if !defined(USE_ALSA)
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
+#else
+#define ALSA_PCM_NEW_HW_PARAMS_API
+#include <alsa/asoundlib.h>
+#endif
 
 typedef struct {
 	char	riff_id[4]; /* ="RIFF" */
@@ -31,7 +36,7 @@ typedef struct {
 	int16_t	nchannels;
 	int32_t	framerate;
 	int32_t	byterate;
-	int16_t	sampwidth;
+	int16_t	riff_align;
 	int16_t	format;
 	char	riff_data[4]; /* ="data" */
 	int32_t	nframes;
