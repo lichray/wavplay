@@ -2,14 +2,14 @@
 wavplay
 =======
 
------------------------------------------
-a C library to play WAV sound via OSS
------------------------------------------
+-------------------------------------------
+a C library to play WAV sound via OSS/ALSA
+-------------------------------------------
 
 :Author: Zhihao Yuan <lichray@gmail.com>
 :Date:   2011-04-12
 :Copyright: 2-clause BSD License
-:Version: 0.3a
+:Version: 0.3b
 :Manual section: 3
 
 SYNOPSIS
@@ -35,9 +35,11 @@ The ``wav_play()`` function opens and plays a WAV sound file. If ``snd_init()`` 
 
 The default OSS device is `/dev/dsp`, which can be defined through the macro ``DEV_NODE``. For each call to ``wav_play()``, the device will be reseted; sound mixing is available if your OSS supports it.
 
+If the macro ``USE_ALSA`` is defined, `wavplay` uses ALSA instead of OSS as the backend. The default ALSA hardware name if `default`, which can be defined through the macro ``PCM_NAME``.
+
 RETURN VALUES
 ==============
-If successful, ``snd_init()`` returns a non-negative integer.
+If successful, ``snd_init()`` returns a non-negative integer. The actual value may be different for OSS/ALSA.
 
 BUGS
 =====
