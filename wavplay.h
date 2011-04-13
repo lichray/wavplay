@@ -37,7 +37,7 @@ typedef struct {
 	int32_t	framerate;
 	int32_t	byterate;
 	int16_t	riff_align;
-	int16_t	format;
+	int16_t	bitdepth;
 	char	riff_data[4]; /* ="data" */
 	int32_t	nframes;
 } wavheader_t;
