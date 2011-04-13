@@ -19,10 +19,12 @@
 #include <string.h>
 #include <unistd.h>
 #if !defined(USE_ALSA)
+#define DEV_NAME "/dev/dsp"
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
 #else
+#define DEV_NAME "default"
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #include <alsa/asoundlib.h>
 #endif

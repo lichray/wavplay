@@ -48,11 +48,11 @@ snd_end(void);
 .fi
 .SH DESCRIPTION
 .sp
-The \fBwav_play()\fP function opens and plays a WAV sound file. If \fBsnd_init()\fP is not called before, \fBwav_play()\fP will initialize the OSS sound device. Until the \fBsnd_end()\fP is called manually or the program is quit, the device reminds open.
+A call to \fBsnd_init()\fP is required before any other operations. Until the \fBsnd_end()\fP is called manually or the program is quit, the sound device reminds open.
 .sp
-The default OSS device is \fI/dev/dsp\fP, which can be defined through the macro \fBDEV_NODE\fP. For each call to \fBwav_play()\fP, the device will be reseted; sound mixing is available if your OSS supports it.
+The \fBwav_play()\fP function opens and plays a WAV sound file. The sound hardware will be set according the file format.
 .sp
-If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default ALSA hardware name if \fIdefault\fP, which can be defined through the macro \fBPCM_NAME\fP.
+If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
 .SH RETURN VALUES
 .sp
 If successful, \fBsnd_init()\fP returns a non\-negative integer. The actual value may be different for OSS/ALSA.

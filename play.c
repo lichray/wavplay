@@ -13,8 +13,10 @@ int main(int argc, char *argv[]) {
 		printf("Usage: %s FILE...\n", prog);
 		return 1;
 	}
-	if(snd_init() == -1)
-		perror(prog);
+	if (snd_init() < 0) {
+		fprintf(stderr, "%s: Failed to open device `" DEV_NAME "'\n", prog);
+		return 1;
+	}
 	int i = 1;
 	while (1) {
 		wav_play(argv[i++]);

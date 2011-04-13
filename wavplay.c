@@ -8,8 +8,6 @@
  */
 
 #include "wavplay.h"
-#define DEV_NODE "/dev/dsp"
-#define PCM_NAME "default"
 #define BUF_SIZE 4096
 #define PERIOD   2
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -27,7 +25,7 @@ static int devfd = -1;
 
 int snd_init(void) {
 	if (devfd > -1) snd_end();
-	devfd = open(DEV_NODE, O_WRONLY);
+	devfd = open(DEV_NAME, O_WRONLY);
 	return devfd;
 }
 
@@ -46,7 +44,6 @@ void snd_end(void) {
 void snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
 	size_t i = 0;
-	if (devfd < 0) snd_init();
 	while (!feof(fp)) {
 		fread(buf, sizeof(buf), 1, fp);
 		write(devfd, buf, n - i < sizeof(buf) ? n - i : sizeof(buf));
@@ -67,7 +64,7 @@ static snd_pcm_t *pcm = NULL;
 
 int snd_init(void) {
 	if (pcm) snd_end();
-	return snd_pcm_open(&pcm, PCM_NAME, SND_PCM_STREAM_PLAYBACK, 0);
+	return snd_pcm_open(&pcm, DEV_NAME, SND_PCM_STREAM_PLAYBACK, 0);
 }
 
 void snd_set(int format, int nchannels, int framerate) {
@@ -91,7 +88,6 @@ void snd_end(void) {
 void snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE * 2];
 	size_t i = 0;
-	if (pcm == NULL) snd_init();
 	snd_pcm_format_t format;
 	unsigned int nchannels;
 	snd_pcm_hw_params_t *params;
@@ -163,6 +159,3 @@ void wav_play(const char *fn) {
 	} else perror(__func__);
 }
 
-#undef DEV_NODE
-#undef PCM_NAME
-#undef BUF_SIZE
