@@ -12,8 +12,8 @@ tags : *.h play.c wavplay.c
 	$(TAGS) *.h play.c wavplay.c
 
 man : $(PROGRAM).3
-$(PROGRAM).3 : README
-	rst2man.py README $(PROGRAM).3
+$(PROGRAM).3 : README.rst
+	rst2man.py README.rst $(PROGRAM).3
 
 $(PROGRAM) : play.o wavplay.o
 	$(CC) $(LDFLAGS) -o wavplay play.o wavplay.o
