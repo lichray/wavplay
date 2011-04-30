@@ -128,13 +128,27 @@ wavfile_t * wav_open(const char *fn) {
 	FILE *fp;
 	wavfile_t *wav = NULL;
 	if ((fp = fn ? fopen(fn, "rb") : stdin)) {
+		riffchunk_t ck;
 		wavheader_t header;
-		fread(&header, sizeof(header), 1, fp);
+#define skip(n) (fseek(fp, n, SEEK_CUR))
+#define read2(t) (fread(&t, sizeof(t), 1, fp))
+		read2(ck);
+		skip(4L);
+		read2(ck);
+		read2(header);
+		if (ck.size != 16) {
+			skip(ck.size - 16L);
+			read2(ck);
+			skip(ck.size);
+		}
+		read2(ck);
+#undef skip
+#undef read2
 		if (ferror(fp))
 			return wav;
 		wav = (wavfile_t*) malloc(sizeof(wavfile_t));
 		wav->stream = fp;
-		wav->size = header.nframes;
+		wav->size = ck.size;
 		int format = wav_getfmt(header.comptype, header.bitdepth);
 		if (format < 0) {
 			eputs("Unsupported PCM format");

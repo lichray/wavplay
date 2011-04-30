@@ -34,18 +34,17 @@
 #endif
 
 typedef struct {
-	char	riff_id[4]; /* ="RIFF" */
-	int32_t	riff_size;
-	char	riff_fmt[8]; /* ="WAVEfmt" */
-	int32_t	riff_tag;
+	char	id[4];
+	int32_t	size;
+} riffchunk_t;
+
+typedef struct {
 	int16_t	comptype;
 	int16_t	nchannels;
 	int32_t	framerate;
 	int32_t	byterate;
-	int16_t	riff_align;
+	int16_t	_align;
 	int16_t	bitdepth;
-	char	riff_data[4]; /* ="data" */
-	int32_t	nframes;
 } wavheader_t;
 
 typedef struct {
