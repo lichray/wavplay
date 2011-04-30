@@ -111,6 +111,7 @@ void snd_play(FILE *fp, size_t n) {
 int wav_getfmt(int comptype, int bitdepth) {
 	switch (comptype) {
 	case 1:
+	case -2:
 		bitdepth += bitdepth % 8;
 		switch (bitdepth) {
 		case 8:  return WAV_FMT_8;
