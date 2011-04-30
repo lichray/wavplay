@@ -16,7 +16,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #if !defined(USE_ALSA)
 #define DEV_NAME "/dev/dsp"
@@ -47,17 +46,11 @@ typedef struct {
 	int16_t	bitdepth;
 } wavheader_t;
 
-typedef struct {
-	FILE *stream;
-	size_t size;
-} wavfile_t;
-
-int         snd_init(void);
-void        snd_end(void);
-void        snd_set(int format, int nchannels, int framerate);
-void        snd_play(FILE *stream, size_t size);
-wavfile_t * wav_open(const char *filename);
-void        wav_play(const char *filename);
-void        wav_close(wavfile_t *wav);
+int 	snd_init(void);
+void	snd_end(void);
+void	snd_set(int format, int nchannels, int framerate);
+void	snd_play(FILE *stream, size_t size);
+size_t	wav_read(FILE *stream);
+void	wav_play(const char *filename);
 
 #endif

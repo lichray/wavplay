@@ -8,6 +8,7 @@
  */
 
 #include "wavplay.h"
+#include <string.h>
 #define BUF_SIZE 4096
 #define PERIOD   2
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -124,55 +125,57 @@ int wav_getfmt(int comptype, int bitdepth) {
 	}
 }
 
-wavfile_t * wav_open(const char *fn) {
-	FILE *fp;
-	wavfile_t *wav = NULL;
-	if ((fp = fn ? fopen(fn, "rb") : stdin)) {
-		riffchunk_t ck;
-		wavheader_t header;
-#define skip(n) (fseek(fp, n, SEEK_CUR))
+size_t wav_read(FILE *fp) {
+	riffchunk_t ck;
+	wavheader_t header;
+#define skip(n) (fseek(fp, (long) (n), SEEK_CUR))
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
-		read2(ck);
-		skip(4L);
-		read2(ck);
-		read2(header);
-		if (ck.size != 16) {
-			skip(ck.size - 16L);
-			read2(ck);
-			skip(ck.size);
+#define chkid(s) (!strncmp(ck.id, s, 4))
+	read2(ck);
+	if (ferror(fp)) {
+		perror(__func__);
+		return 0;
+	}
+	if (!chkid("RIFF")) {
+		eputs("Not an RIFF file");
+		return 0;
+	}
+	read2(ck.id);
+	if (!chkid("WAVE")) {
+		eputs("Not a WAVE file");
+		return 0;
+	}
+	while (read2(ck)) {
+		if (chkid("fmt ")) {
+			read2(header);
+			skip(ck.size - sizeof(header));
 		}
-		read2(ck);
+		else if (chkid("data")) break;
+		else skip(ck.size);
+	}
 #undef skip
 #undef read2
-		if (ferror(fp))
-			return wav;
-		wav = (wavfile_t*) malloc(sizeof(wavfile_t));
-		wav->stream = fp;
-		wav->size = ck.size;
-		int format = wav_getfmt(header.comptype, header.bitdepth);
-		if (format < 0) {
-			eputs("Unsupported PCM format");
-			fclose(wav->stream);
-			wav->stream = NULL;
-		} else snd_set(format, header.nchannels, header.framerate);
+#undef chkid
+	int format = wav_getfmt(header.comptype, header.bitdepth);
+	if (format < 0) {
+		eputs("Unsupported PCM format");
+		return 0;
+	} else {
+		snd_set(format, header.nchannels, header.framerate);
+		return ck.size;
 	}
-	return wav;
-}
-
-void wav_close(wavfile_t *wav) {
-	if (wav->stream) fclose(wav->stream);
-	free(wav);
 }
 
 void wav_play(const char *fn) {
-	wavfile_t *wav;
-	if ((wav = wav_open(fn))) {
-		if (wav->stream)
-			snd_play(wav->stream, wav->size);
+	FILE *fp = fn ? fopen(fn, "rb") : stdin;
+	if (fp) {
+		size_t size = wav_read(fp);
+		if (size)
+			snd_play(fp, size);
 		else
 			fprintf(stderr, "%s: Skipping file `%s'\n",
 					__func__, fn ? fn : "STDIN");
-		wav_close(wav);
+		fclose(fp);
 	} else perror(__func__);
 }
 
