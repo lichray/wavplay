@@ -42,7 +42,7 @@ typedef struct {
 	int16_t	nchannels;
 	int32_t	framerate;
 	int32_t	byterate;
-	int16_t	_align;
+	int16_t	blocksize;
 	int16_t	bitdepth;
 } wavheader_t;
 

@@ -108,16 +108,15 @@ void snd_play(FILE *fp, size_t n) {
 
 #endif
 
-int wav_getfmt(int comptype, int bitdepth) {
-	switch (comptype) {
+int wav_getfmt(const wavheader_t *header) {
+	switch (header->comptype) {
 	case 1:
 	case -2:
-		bitdepth += bitdepth % 8;
-		switch (bitdepth) {
-		case 8:  return WAV_FMT_8;
-		case 16: return WAV_FMT_16;
-		case 24: return WAV_FMT_24;
-		case 32: return WAV_FMT_32;
+		switch ((header->bitdepth + 7) / 8) {
+		case 1:  return WAV_FMT_8;
+		case 2:  return WAV_FMT_16;
+		case 3:  return WAV_FMT_24;
+		case 4:  return WAV_FMT_32;
 		default: return -1;
 		}
 	case 6: return WAV_FMT_A_LAW;
@@ -168,7 +167,7 @@ size_t wav_read(FILE *fp) {
 #undef skip
 #undef read2
 #undef chkid
-	int format = wav_getfmt(header.comptype, header.bitdepth);
+	int format = wav_getfmt(&header);
 	if (format < 0) {
 		eputs("Unsupported PCM format");
 		return 0;
