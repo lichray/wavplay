@@ -99,8 +99,9 @@ void snd_play(FILE *fp, size_t n) {
 	while (!feof(fp)) {
 		fread(buf, sizeof(buf), 1, fp);
 		snd_pcm_prepare(pcm);
-		snd_pcm_writei(pcm, buf, (n - i < sizeof(buf) ? 
-				n - i : sizeof(buf)) / (format * nchannels));
+		snd_pcm_writei(pcm, buf,
+				(n - i < sizeof(buf) ? n - i : sizeof(buf)) /
+				(snd_pcm_format_width(format) / 8 * nchannels));
 		i += sizeof(buf);
 	}
 	snd_pcm_drain(pcm);
