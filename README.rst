@@ -7,9 +7,9 @@ a C library to play WAV sound via OSS/ALSA
 -------------------------------------------
 
 :Author: Zhihao Yuan <lichray@gmail.com>
-:Date:   2011-04-29
+:Date:   2011-04-30
 :Copyright: 2-clause BSD License
-:Version: 0.3b
+:Version: 0.3
 :Manual section: 3
 
 SYNOPSIS
@@ -44,5 +44,5 @@ If successful, ``snd_init()`` returns a non-negative integer. The actual value m
 BUGS
 =====
 
-This library only supports standard, little-endian WAV file without a AIFF fact chunk.
+This library does not support WAV files larger than 2GB.
 

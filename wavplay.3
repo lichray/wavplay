@@ -1,6 +1,6 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-04-29" "0.3b" ""
+.TH WAVPLAY 3 "2011-04-30" "0.3" ""
 .SH NAME
 wavplay \- a C library to play WAV sound via OSS/ALSA
 .
@@ -58,7 +58,7 @@ If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS a
 If successful, \fBsnd_init()\fP returns a non\-negative integer. The actual value may be different for OSS/ALSA.
 .SH BUGS
 .sp
-This library only supports standard, little\-endian WAV file without a AIFF fact chunk.
+This library does not support WAV files larger than 2GB.
 .SH AUTHOR
 Zhihao Yuan <lichray@gmail.com>
 .SH COPYRIGHT
