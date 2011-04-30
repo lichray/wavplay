@@ -9,18 +9,18 @@
 
 #include "wavplay.h"
 #include <string.h>
-#define BUF_SIZE 4096
-#define PERIOD   2
+#define BUF_SIZE	4096
+#define PERIOD		2
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
 #if !defined(USE_ALSA)
 
-#define WAV_FMT_8      AFMT_U8;
-#define WAV_FMT_16     AFMT_S16_LE;
-#define WAV_FMT_24     AFMT_S24_LE;
-#define WAV_FMT_32     AFMT_S32_LE;
-#define WAV_FMT_A_LAW  AFMT_A_LAW;
-#define WAV_FMT_MU_LAW AFMT_MU_LAW;
+#define WAV_FMT_8	AFMT_U8;
+#define WAV_FMT_16	AFMT_S16_LE;
+#define WAV_FMT_24	AFMT_S24_LE;
+#define WAV_FMT_32	AFMT_S32_LE;
+#define WAV_FMT_A_LAW	AFMT_A_LAW;
+#define WAV_FMT_MU_LAW	AFMT_MU_LAW;
 
 static int devfd = -1;
 
@@ -54,12 +54,12 @@ void snd_play(FILE *fp, size_t n) {
 
 #else
 
-#define WAV_FMT_8      SND_PCM_FORMAT_U8;
-#define WAV_FMT_16     SND_PCM_FORMAT_S16;
-#define WAV_FMT_24     SND_PCM_FORMAT_S24;
-#define WAV_FMT_32     SND_PCM_FORMAT_S32;
-#define WAV_FMT_A_LAW  SND_PCM_FORMAT_A_LAW;
-#define WAV_FMT_MU_LAW SND_PCM_FORMAT_MU_LAW;
+#define WAV_FMT_8	SND_PCM_FORMAT_U8;
+#define WAV_FMT_16	SND_PCM_FORMAT_S16_LE;
+#define WAV_FMT_24	SND_PCM_FORMAT_S24_3LE;
+#define WAV_FMT_32	SND_PCM_FORMAT_S32_LE;
+#define WAV_FMT_A_LAW	SND_PCM_FORMAT_A_LAW;
+#define WAV_FMT_MU_LAW	SND_PCM_FORMAT_MU_LAW;
 
 static snd_pcm_t *pcm = NULL;
 
@@ -114,10 +114,10 @@ int wav_getfmt(const wavheader_t *header) {
 	case 1:
 	case -2:
 		switch ((header->bitdepth + 7) / 8) {
-		case 1:  return WAV_FMT_8;
-		case 2:  return WAV_FMT_16;
-		case 3:  return WAV_FMT_24;
-		case 4:  return WAV_FMT_32;
+		case 1: return WAV_FMT_8;
+		case 2: return WAV_FMT_16;
+		case 3: return WAV_FMT_24;
+		case 4: return WAV_FMT_32;
 		default: return -1;
 		}
 	case 6: return WAV_FMT_A_LAW;
