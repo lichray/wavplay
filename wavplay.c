@@ -127,9 +127,11 @@ int wav_getfmt(int comptype, int bitdepth) {
 wavfile_t * wav_open(const char *fn) {
 	FILE *fp;
 	wavfile_t *wav = NULL;
-	if ((fp = fopen(fn, "r"))) {
+	if ((fp = fn ? fopen(fn, "rb") : stdin)) {
 		wavheader_t header;
 		fread(&header, sizeof(header), 1, fp);
+		if (ferror(fp))
+			return wav;
 		wav = (wavfile_t*) malloc(sizeof(wavfile_t));
 		wav->stream = fp;
 		wav->size = header.nframes;
@@ -154,7 +156,8 @@ void wav_play(const char *fn) {
 		if (wav->stream)
 			snd_play(wav->stream, wav->size);
 		else
-			fprintf(stderr, "%s: Skipping file `%s'\n", __func__, fn);
+			fprintf(stderr, "%s: Skipping file `%s'\n",
+					__func__, fn ? fn : "STDIN");
 		wav_close(wav);
 	} else perror(__func__);
 }

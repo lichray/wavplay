@@ -6,11 +6,12 @@
 #include "wavplay.h"
 #include <stdio.h>
 #include <libgen.h>
+#include <string.h>
 
 int main(int argc, char *argv[]) {
 	char *prog = basename(argv[0]);
 	if (argc < 2) {
-		printf("Usage: %s FILE...\n", prog);
+		printf("Usage: %s [FILE|-]...\n", prog);
 		return 1;
 	}
 	if (snd_init() < 0) {
@@ -19,7 +20,8 @@ int main(int argc, char *argv[]) {
 	}
 	int i = 1;
 	while (1) {
-		wav_play(argv[i++]);
+		const char *fn = argv[i++];
+		wav_play(strcmp(fn, "-") ? fn : NULL);
 		if (i < argc) sleep(1);
 		else break;
 	}

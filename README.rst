@@ -7,7 +7,7 @@ a C library to play WAV sound via OSS/ALSA
 -------------------------------------------
 
 :Author: Zhihao Yuan <lichray@gmail.com>
-:Date:   2011-04-12
+:Date:   2011-04-29
 :Copyright: 2-clause BSD License
 :Version: 0.3b
 :Manual section: 3
@@ -33,7 +33,7 @@ DESCRIPTION
 
 A call to ``snd_init()`` is required before any other operations. Until the ``snd_end()`` is called manually or the program is quit, the sound device reminds open.
 
-The ``wav_play()`` function opens and plays a WAV sound file. The sound hardware will be set according the file format.
+The ``wav_play()`` function opens and plays a WAV sound file. If the filename is `NULL` (an empty pointer), the function reads from the standard input. The sound hardware will be set according the file format.
 
 If the macro ``USE_ALSA`` is defined, `wavplay` uses ALSA instead of OSS as the backend. The default OSS device is `/dev/dsp`, and the default ALSA PCM is `default`. They are defined by the macro ``DEV_NAME``.
 

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-04-12" "0.3b" ""
+.TH WAVPLAY 3 "2011-04-29" "0.3b" ""
 .SH NAME
 wavplay \- a C library to play WAV sound via OSS/ALSA
 .
@@ -50,7 +50,7 @@ snd_end(void);
 .sp
 A call to \fBsnd_init()\fP is required before any other operations. Until the \fBsnd_end()\fP is called manually or the program is quit, the sound device reminds open.
 .sp
-The \fBwav_play()\fP function opens and plays a WAV sound file. The sound hardware will be set according the file format.
+The \fBwav_play()\fP function opens and plays a WAV sound file. If the filename is \fINULL\fP (an empty pointer), the function reads from the standard input. The sound hardware will be set according the file format.
 .sp
 If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
 .SH RETURN VALUES
