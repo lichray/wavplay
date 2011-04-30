@@ -22,7 +22,11 @@
 #define DEV_NAME "/dev/dsp"
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+#include <soundcard.h>
+#else
 #include <sys/soundcard.h>
+#endif
 #else
 #define DEV_NAME "default"
 #define ALSA_PCM_NEW_HW_PARAMS_API
