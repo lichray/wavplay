@@ -146,12 +146,23 @@ size_t wav_read(FILE *fp) {
 		return 0;
 	}
 	while (read2(ck)) {
-		if (chkid("fmt ")) {
+		if (ck.size < 0) {
+			eputs("RIFF chunk size > 2GB");
+			return 0;
+		}
+		else if (chkid("fmt ")) {
 			read2(header);
-			skip(ck.size - sizeof(header));
+			if (ck.size < sizeof(header))
+				eputs("Bad format chunk");
+			else
+				skip(ck.size - sizeof(header));
 		}
 		else if (chkid("data")) break;
 		else skip(ck.size);
+	}
+	if (!chkid("data")) {
+		eputs("Malformed RIFF file");
+		return 0;
 	}
 #undef skip
 #undef read2
