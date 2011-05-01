@@ -43,9 +43,10 @@ void snd_set(int format, int nchannels, int framerate) {
 	ioctl(devfd, SNDCTL_DSP_SPEED, &framerate);
 }
 
-void snd_end(void) {
-	close(devfd);
+int snd_end(void) {
+	int st = close(devfd);
 	devfd = -1;
+	return st;
 }
 
 void snd_play(FILE *fp, size_t n) {
@@ -88,9 +89,10 @@ void snd_set(int format, int nchannels, int framerate) {
 	snd_pcm_hw_params(pcm, params);
 }
 
-void snd_end(void) {
-	snd_pcm_close(pcm);
+int snd_end(void) {
+	int st = snd_pcm_close(pcm);
 	pcm = NULL;
+	return st;
 }
 
 void snd_play(FILE *fp, size_t n) {
@@ -189,16 +191,17 @@ size_t wav_read(FILE *fp) {
 	}
 }
 
-void wav_play(const char *fn) {
+int wav_play(const char *fn) {
 	FILE *fp = fn ? fopen(fn, "rb") : stdin;
+	int st = -1;
 	if (fp) {
 		size_t size = wav_read(fp);
-		if (size)
+		if (size) {
 			snd_play(fp, size);
-		else
-			fprintf(stderr, "%s: Skipping file `%s'\n",
-					__func__, fn ? fn : "STDIN");
+			st = 0;
+		}
 		fclose(fp);
 	} else perror(__func__);
+	return st;
 }
 

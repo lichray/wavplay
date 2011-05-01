@@ -21,7 +21,11 @@ int main(int argc, char *argv[]) {
 	int i = 1;
 	while (1) {
 		const char *fn = argv[i++];
-		wav_play(strcmp(fn, "-") ? fn : NULL);
+		if (!strcmp(fn, "-"))
+			fn = NULL;
+		if (wav_play(fn))
+			fprintf(stderr, "%s: Skipping file `%s'\n",
+					prog, fn ? fn : "STDIN");
 		if (i < argc) sleep(1);
 		else break;
 	}

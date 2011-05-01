@@ -46,11 +46,12 @@ typedef struct {
 	int16_t	bitdepth;
 } wavheader_t;
 
-int 	snd_init(void);
-void	snd_end(void);
+int	wav_play(const char *filename);
+int	snd_init(void);
+int	snd_end(void);
+
+size_t	wav_read(FILE *stream);
 void	snd_set(int format, int nchannels, int framerate);
 void	snd_play(FILE *stream, size_t size);
-size_t	wav_read(FILE *stream);
-void	wav_play(const char *filename);
 
 #endif
