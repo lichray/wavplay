@@ -6,7 +6,7 @@ PROGRAM := wavplay
 .PHONY : all clean
 all : $(PROGRAM)
 clean :
-	rm -f $(PROGRAM) play.o wavplay.o tags $(PROGRAM).3
+	rm -f $(PROGRAM) play.o wavplay.o tags
 
 tags : *.h play.c wavplay.c
 	$(TAGS) *.h play.c wavplay.c
