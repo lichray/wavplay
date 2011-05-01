@@ -17,13 +17,13 @@ SYNOPSIS
 
 
 | ``#include "wavplay.h"``
- 
+|
 | `int`
 | ``wav_play``\(`const` `char` `\*` `filename`);
- 
+|
 | `int`
 | ``snd_init``\(`void`);
- 
+|
 | `int`
 | ``snd_end``\(`void`);
 
