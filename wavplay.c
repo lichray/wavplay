@@ -18,7 +18,7 @@
 #define WAV_FMT_16	AFMT_S16_LE;
 #ifdef	AFMT_S24_PACKED
 #define WAV_FMT_24	AFMT_S24_PACKED;
-#elif	AFMT_S24_LE
+#elif	__FreeBSD__
 #define WAV_FMT_24	AFMT_S24_LE;
 #endif
 #ifdef	AFMT_S32_LE
