@@ -88,6 +88,8 @@ int snd_set(int format, int nchannels, int framerate) {
 	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
 	st |= snd_pcm_hw_params_set_rate_resample(pcm, params, 0);
 	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
+	st |= snd_pcm_hw_params_set_periods(pcm, params, 4, 0);
+	st |= snd_pcm_hw_params_set_buffer_size(pcm, params, BUF_SIZE);
 	st |= snd_pcm_hw_params(pcm, params);
 	return st;
 }
@@ -107,7 +109,7 @@ int snd_play(FILE *fp, size_t n) {
 	snd_pcm_hw_params_get_format(params, &format);
 	snd_pcm_hw_params_get_channels(params, &nchannels);
 	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
-	unsigned char buf[BUF_SIZE];
+	unsigned char buf[BUF_SIZE * framesize];
 	size_t i = 0;
 	while (!feof(fp)) {
 		fread(buf, sizeof(buf), 1, fp);
