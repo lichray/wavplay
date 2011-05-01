@@ -10,7 +10,7 @@
 #include "wavplay.h"
 #include <string.h>
 #define BUF_SIZE	4096
-#define PERIOD		2
+#define PERIOD		16
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
 #if !defined(USE_ALSA)
@@ -87,7 +87,7 @@ void snd_end(void) {
 }
 
 void snd_play(FILE *fp, size_t n) {
-	unsigned char buf[BUF_SIZE * 2];
+	unsigned char buf[BUF_SIZE];
 	size_t i = 0;
 	snd_pcm_format_t format;
 	unsigned int nchannels;
