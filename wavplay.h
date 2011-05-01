@@ -52,6 +52,6 @@ int	snd_end(void);
 
 size_t	wav_read(FILE *stream);
 void	snd_set(int format, int nchannels, int framerate);
-void	snd_play(FILE *stream, size_t size);
+int	snd_play(FILE *stream, size_t size);
 
 #endif

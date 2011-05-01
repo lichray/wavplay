@@ -49,7 +49,7 @@ int snd_end(void) {
 	return st;
 }
 
-void snd_play(FILE *fp, size_t n) {
+int snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
 	size_t i = 0;
 	while (!feof(fp)) {
@@ -57,7 +57,7 @@ void snd_play(FILE *fp, size_t n) {
 		write(devfd, buf, n - i < sizeof(buf) ? n - i : sizeof(buf));
 		i += sizeof(buf);
 	}
-	ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
+	return ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
 }
 
 #else
@@ -95,7 +95,7 @@ int snd_end(void) {
 	return st;
 }
 
-void snd_play(FILE *fp, size_t n) {
+int snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
 	size_t i = 0;
 	snd_pcm_format_t format;
@@ -113,7 +113,7 @@ void snd_play(FILE *fp, size_t n) {
 				(snd_pcm_format_width(format) / 8 * nchannels));
 		i += sizeof(buf);
 	}
-	snd_pcm_drain(pcm);
+	return snd_pcm_drain(pcm);
 }
 
 #endif
@@ -196,10 +196,8 @@ int wav_play(const char *fn) {
 	int st = -1;
 	if (fp) {
 		size_t size = wav_read(fp);
-		if (size) {
-			snd_play(fp, size);
-			st = 0;
-		}
+		if (size)
+			st = snd_play(fp, size);
 		fclose(fp);
 	} else perror(__func__);
 	return st;
