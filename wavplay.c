@@ -56,6 +56,7 @@ void snd_play(FILE *fp, size_t n) {
 		write(devfd, buf, n - i < sizeof(buf) ? n - i : sizeof(buf));
 		i += sizeof(buf);
 	}
+	ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
 }
 
 #else
