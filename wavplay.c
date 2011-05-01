@@ -86,6 +86,7 @@ int snd_set(int format, int nchannels, int framerate) {
 	st |= snd_pcm_hw_params_set_access(pcm, params, SND_PCM_ACCESS_RW_INTERLEAVED);
 	st |= snd_pcm_hw_params_set_format(pcm, params, format);
 	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
+	st |= snd_pcm_hw_params_set_rate_resample(pcm, params, 0);
 	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
 	st |= snd_pcm_hw_params(pcm, params);
 	return st;
