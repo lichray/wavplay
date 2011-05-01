@@ -98,8 +98,6 @@ int snd_end(void) {
 }
 
 int snd_play(FILE *fp, size_t n) {
-	unsigned char buf[BUF_SIZE];
-	size_t i = 0;
 	snd_pcm_format_t format;
 	unsigned int nchannels;
 	snd_pcm_hw_params_t *params;
@@ -107,12 +105,14 @@ int snd_play(FILE *fp, size_t n) {
 	snd_pcm_hw_params_current(pcm, params);
 	snd_pcm_hw_params_get_format(params, &format);
 	snd_pcm_hw_params_get_channels(params, &nchannels);
+	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
+	unsigned char buf[BUF_SIZE];
+	size_t i = 0;
 	while (!feof(fp)) {
 		fread(buf, sizeof(buf), 1, fp);
 		snd_pcm_prepare(pcm);
-		snd_pcm_writei(pcm, buf,
-				(n - i < sizeof(buf) ? n - i : sizeof(buf)) /
-				(snd_pcm_format_width(format) / 8 * nchannels));
+		snd_pcm_writei(pcm, buf, (n - i < sizeof(buf) ?
+				n - i : sizeof(buf)) / framesize);
 		i += sizeof(buf);
 	}
 	return snd_pcm_drain(pcm);
