@@ -10,7 +10,6 @@
 #include "wavplay.h"
 #include <string.h>
 #define BUF_SIZE	4096
-#define PERIOD		16
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
 #if !defined(USE_ALSA)
@@ -85,7 +84,6 @@ void snd_set(int format, int nchannels, int framerate) {
 	snd_pcm_hw_params_set_format(pcm, params, format);
 	snd_pcm_hw_params_set_channels(pcm, params, nchannels);
 	snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
-	snd_pcm_hw_params_set_periods(pcm, params, PERIOD, 0);
 	snd_pcm_hw_params(pcm, params);
 }
 
