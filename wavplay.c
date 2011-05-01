@@ -17,8 +17,14 @@
 
 #define WAV_FMT_8	AFMT_U8;
 #define WAV_FMT_16	AFMT_S16_LE;
+#ifdef	AFMT_S24_PACKED
+#define WAV_FMT_24	AFMT_S24_PACKED;
+#elif	AFMT_S24_LE
 #define WAV_FMT_24	AFMT_S24_LE;
+#endif
+#ifdef	AFMT_S32_LE
 #define WAV_FMT_32	AFMT_S32_LE;
+#endif
 #define WAV_FMT_A_LAW	AFMT_A_LAW;
 #define WAV_FMT_MU_LAW	AFMT_MU_LAW;
 
@@ -116,8 +122,12 @@ int wav_getfmt(const wavheader_t *header) {
 		switch ((header->bitdepth + 7) / 8) {
 		case 1: return WAV_FMT_8;
 		case 2: return WAV_FMT_16;
+#ifdef	WAV_FMT_24
 		case 3: return WAV_FMT_24;
+#endif
+#ifdef	WAV_FMT_32
 		case 4: return WAV_FMT_32;
+#endif
 		default: return -1;
 		}
 	case 6: return WAV_FMT_A_LAW;
