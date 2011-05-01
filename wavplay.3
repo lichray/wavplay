@@ -1,6 +1,6 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-04-30" "0.3" ""
+.TH WAVPLAY 3 "2011-05-01" "0.4" ""
 .SH NAME
 wavplay \- a C library to play WAV sound via OSS/ALSA
 .
@@ -31,31 +31,37 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
 .SH SYNOPSIS
+.nf
+\fB#include "wavplay.h"\fP
+.fi
 .sp
 .nf
-.ft C
-#include "wavplay.h"
-
-void
-wav_play(const char *filename);
-
-int
-snd_init(void);
-
-void
-snd_end(void);
-.ft P
+\fIint\fP
+\fBwav_play\fP(\fIconst\fP \fIchar\fP \fI*\fP \fIfilename\fP);
 .fi
+.sp
+.nf
+\fIint\fP
+\fBsnd_init\fP(\fIvoid\fP);
+.fi
+.sp
+.nf
+\fIint\fP
+\fBsnd_end\fP(\fIvoid\fP);
+.fi
+.sp
 .SH DESCRIPTION
 .sp
-A call to \fBsnd_init()\fP is required before any other operations. Until the \fBsnd_end()\fP is called manually or the program is quit, the sound device reminds open.
+The \fBsnd_init()\fP function is required to be called before any other operations. Until the \fBsnd_end()\fP function is called or the program is quit, the sound device reminds open.
 .sp
-The \fBwav_play()\fP function opens and plays a WAV sound file. If the filename is \fINULL\fP (an empty pointer), the function reads from the standard input. The sound hardware will be set according the file format.
+The \fBwav_play()\fP function opens and plays a WAV sound file. If the filename is \fINULL\fP (an empty pointer), the function reads from the standard input. The sound device will be set according to the file format.
 .sp
-If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
+If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM name is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
 .SH RETURN VALUES
 .sp
-If successful, \fBsnd_init()\fP returns a non\-negative integer. The actual value may be different for OSS/ALSA.
+The \fBsnd_init()\fP and \fBsnd_end()\fP functions return a non\-negative integer if successful. The actual value is different for OSS/ALSA.
+.sp
+The \fBwav_play()\fP function returns the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
 .SH BUGS
 .sp
 This library does not support WAV files larger than 2GB.
