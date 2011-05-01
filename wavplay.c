@@ -35,11 +35,13 @@ int snd_init(void) {
 	return devfd;
 }
 
-void snd_set(int format, int nchannels, int framerate) {
-	ioctl(devfd, SNDCTL_DSP_RESET, NULL);
-	ioctl(devfd, SNDCTL_DSP_SETFMT, &format);
-	ioctl(devfd, SNDCTL_DSP_CHANNELS, &nchannels);
-	ioctl(devfd, SNDCTL_DSP_SPEED, &framerate);
+int snd_set(int format, int nchannels, int framerate) {
+	int st = 0;
+	st |= ioctl(devfd, SNDCTL_DSP_RESET, NULL);
+	st |= ioctl(devfd, SNDCTL_DSP_SETFMT, &format);
+	st |= ioctl(devfd, SNDCTL_DSP_CHANNELS, &nchannels);
+	st |= ioctl(devfd, SNDCTL_DSP_SPEED, &framerate);
+	return st;
 }
 
 int snd_end(void) {
@@ -75,16 +77,18 @@ int snd_init(void) {
 	return snd_pcm_open(&pcm, DEV_NAME, SND_PCM_STREAM_PLAYBACK, 0);
 }
 
-void snd_set(int format, int nchannels, int framerate) {
+int snd_set(int format, int nchannels, int framerate) {
+	int st = 0;
 	unsigned int val = framerate;
 	snd_pcm_hw_params_t *params;
 	snd_pcm_hw_params_alloca(&params);
 	snd_pcm_hw_params_any(pcm, params);
-	snd_pcm_hw_params_set_access(pcm, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-	snd_pcm_hw_params_set_format(pcm, params, format);
-	snd_pcm_hw_params_set_channels(pcm, params, nchannels);
-	snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
-	snd_pcm_hw_params(pcm, params);
+	st |= snd_pcm_hw_params_set_access(pcm, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+	st |= snd_pcm_hw_params_set_format(pcm, params, format);
+	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
+	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
+	st |= snd_pcm_hw_params(pcm, params);
+	return st;
 }
 
 int snd_end(void) {
@@ -180,13 +184,12 @@ size_t wav_read(FILE *fp) {
 #undef read2
 #undef chkid
 	int format = wav_getfmt(&header);
-	if (format < 0) {
+	if (format < 0)
 		eputs("Unsupported PCM format");
-		return 0;
-	} else {
-		snd_set(format, header.nchannels, header.framerate);
-		return ck.size;
-	}
+	else if (snd_set(format, header.nchannels, header.framerate))
+		eputs("Failed to setup the sound device");
+	else return ck.size;
+	return 0;
 }
 
 int wav_play(const char *fn) {
