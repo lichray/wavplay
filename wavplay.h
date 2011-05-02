@@ -47,6 +47,7 @@ typedef struct {
 } wavheader_t;
 
 int	wav_play(const char *filename);
+int	wav_send(FILE *stream);
 int	snd_init(void);
 int	snd_end(void);
 

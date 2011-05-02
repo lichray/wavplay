@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 		const char *fn = argv[i++];
 		if (!strcmp(fn, "-"))
 			fn = NULL;
-		if (wav_play(fn))
+		if (fn ? wav_play(fn) : wav_send(stdin))
 			fprintf(stderr, "%s: Skipping file `%s'\n",
 					prog, fn ? fn : "STDIN");
 		if (i < argc) sleep(1);

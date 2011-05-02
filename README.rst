@@ -15,11 +15,13 @@ a C library to play WAV sound via OSS/ALSA
 SYNOPSIS
 =========
 
-
 | ``#include "wavplay.h"``
 |
 | `int`
 | ``wav_play``\(`const` `char` `\*` `filename`);
+|
+| `int`
+| ``wav_send``\(`FILE` `\*` `stream`);
 |
 | `int`
 | ``snd_init``\(`void`);
@@ -32,7 +34,7 @@ DESCRIPTION
 
 The ``snd_init()`` function is required to be called before any other operations. Until the ``snd_end()`` function is called or the program is quit, the sound device reminds open.
 
-The ``wav_play()`` function opens and plays a WAV sound file. If the filename is `NULL` (an empty pointer), the function reads from the standard input. The sound device will be set according to the file format.
+The ``wav_play()`` function opens and plays a WAV sound file, and the ``wav_send()`` function plays a WAV data stream. The sound device will be set according to the sampling format.
 
 If the macro ``USE_ALSA`` is defined, `wavplay` uses ALSA instead of OSS as the backend. The default OSS device is `/dev/dsp`, and the default ALSA PCM name is `default`. They are defined by the macro ``DEV_NAME``.
 
@@ -40,7 +42,7 @@ RETURN VALUES
 ==============
 The ``snd_init()`` and ``snd_end()`` functions return a non-negative integer if successful. The actual value is different for OSS/ALSA.
 
-The ``wav_play()`` function returns the value 0 if the sound data was sent to the device; otherwise the value -1 is returned.
+The ``wav_play()`` and ``wav_send()`` functions return the value 0 if the sound data was sent to the device; otherwise the value -1 is returned.
 
 BUGS
 =====

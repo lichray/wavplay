@@ -38,6 +38,9 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 \fBwav_play\fP(\fIconst\fP \fIchar\fP \fI*\fP \fIfilename\fP);
 
 \fIint\fP
+\fBwav_send\fP(\fIFILE\fP \fI*\fP \fIstream\fP);
+
+\fIint\fP
 \fBsnd_init\fP(\fIvoid\fP);
 
 \fIint\fP
@@ -48,14 +51,14 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .sp
 The \fBsnd_init()\fP function is required to be called before any other operations. Until the \fBsnd_end()\fP function is called or the program is quit, the sound device reminds open.
 .sp
-The \fBwav_play()\fP function opens and plays a WAV sound file. If the filename is \fINULL\fP (an empty pointer), the function reads from the standard input. The sound device will be set according to the file format.
+The \fBwav_play()\fP function opens and plays a WAV sound file, and the \fBwav_send()\fP function plays a WAV data stream. The sound device will be set according to the sampling format.
 .sp
 If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM name is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
 .SH RETURN VALUES
 .sp
 The \fBsnd_init()\fP and \fBsnd_end()\fP functions return a non\-negative integer if successful. The actual value is different for OSS/ALSA.
 .sp
-The \fBwav_play()\fP function returns the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
+The \fBwav_play()\fP and \fBwav_send()\fP functions return the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
 .SH BUGS
 .sp
 This library does not support WAV files larger than 2GB.

@@ -190,14 +190,19 @@ int wav_setdev(const wavheader_t *wav) {
 	return -1;
 }
 
+int wav_send(FILE *fp) {
+	wavheader_t wav[1];
+	size_t size = wav_read(wav, fp);
+	if (size && !wav_setdev(wav))
+		return snd_play(fp, size);
+	return -1;
+}
+
 int wav_play(const char *fn) {
-	FILE *fp = fn ? fopen(fn, "rb") : stdin;
 	int st = -1;
+	FILE *fp = fopen(fn, "rb");
 	if (fp) {
-		wavheader_t wav;
-		size_t size = wav_read(&wav, fp);
-		if (size && !wav_setdev(&wav))
-			st = snd_play(fp, size);
+		st = wav_send(fp);
 		fclose(fp);
 	} else perror(__func__);
 	return st;
