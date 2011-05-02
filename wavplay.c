@@ -52,12 +52,15 @@ int snd_end(void) {
 
 int snd_play(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
-	size_t i = 0;
-	while (!feof(fp)) {
+	while (n > sizeof(buf)) {
 		fread(buf, sizeof(buf), 1, fp);
-		write(devfd, buf, n - i < sizeof(buf) ? n - i : sizeof(buf));
-		i += sizeof(buf);
+		write(devfd, buf, sizeof(buf));
+		n -= sizeof(buf);
 	}
+	fread(buf, n, 1, fp);
+	write(devfd, buf, n);
+	if (feof(fp))
+		eputs("Unexpected end of stream");
 	return ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
 }
 
@@ -149,10 +152,7 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 #define skip(n) (fseek(fp, (long) (n), SEEK_CUR))
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
-	read2(ck);
-	if (ferror(fp))
-		perror(__func__);
-	else if (!chkid("RIFF"))
+	if (!read2(ck) || !chkid("RIFF"))
 		eputs("Not an RIFF file");
 	else if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
