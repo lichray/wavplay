@@ -32,12 +32,12 @@
 #include <alsa/asoundlib.h>
 #endif
 
-typedef struct {
+typedef struct _riffchunk {
 	char	id[4];
 	int32_t	size;
 } riffchunk_t;
 
-typedef struct {
+typedef struct _wavheader {
 	int16_t	comptype;
 	int16_t	nchannels;
 	int32_t	framerate;
@@ -46,9 +46,15 @@ typedef struct {
 	int16_t	bitdepth;
 } wavheader_t;
 
-int	wav_play(const char *filename);
-int	wav_send(FILE *stream);
-int	snd_init(void);
-int	snd_end(void);
+int wav_play(const char *filename);
+int wav_send(FILE *stream);
+
+int snd_init(void);
+int snd_set(int format,
+	    int nchannels,
+	    int framerate);
+int snd_send(FILE *stream,
+	     size_t size);
+int snd_end(void);
 
 #endif

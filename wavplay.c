@@ -12,7 +12,7 @@
 #define BUF_SIZE	4096
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
-#if !defined(USE_ALSA)
+#ifndef USE_ALSA
 
 #define WAV_FMT_8	AFMT_U8;
 #define WAV_FMT_16	AFMT_S16_LE;
@@ -50,7 +50,7 @@ int snd_end(void) {
 	return st;
 }
 
-int snd_play(FILE *fp, size_t n) {
+int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
 	while (n > sizeof(buf)) {
 		fread(buf, sizeof(buf), 1, fp);
@@ -103,7 +103,7 @@ int snd_end(void) {
 	return st;
 }
 
-int snd_play(FILE *fp, size_t n) {
+int snd_send(FILE *fp, size_t n) {
 	snd_pcm_format_t format;
 	unsigned int nchannels;
 	snd_pcm_hw_params_t *params;
@@ -196,7 +196,7 @@ int wav_send(FILE *fp) {
 	wavheader_t wav[1];
 	size_t size = wav_read(wav, fp);
 	if (size && !wav_setdev(wav))
-		return snd_play(fp, size);
+		return snd_send(fp, size);
 	return -1;
 }
 
