@@ -150,35 +150,30 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
 	read2(ck);
-	if (ferror(fp)) {
+	if (ferror(fp))
 		perror(__func__);
-		return 0;
-	}
-	if (!chkid("RIFF")) {
+	else if (!chkid("RIFF"))
 		eputs("Not an RIFF file");
-		return 0;
-	}
-	read2(ck.id);
-	if (!chkid("WAVE")) {
+	else if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
-		return 0;
+	else {
+		while (read2(ck))
+			if (ck.size < 0) {
+				eputs("RIFF chunk size > 2GB");
+				return 0;
+			}
+			else if (chkid("fmt ")) {
+				fread(wav, sizeof(wavheader_t), 1, fp);
+				if (ck.size < sizeof(wavheader_t))
+					eputs("Bad format chunk");
+				else
+					skip(ck.size - sizeof(wavheader_t));
+			}
+			else if (chkid("data"))
+				return ck.size;
+			else skip(ck.size);
+		eputs("Malformed RIFF file");
 	}
-	while (read2(ck)) {
-		if (ck.size < 0) {
-			eputs("RIFF chunk size > 2GB");
-			return 0;
-		}
-		else if (chkid("fmt ")) {
-			fread(wav, sizeof(wavheader_t), 1, fp);
-			if (ck.size < sizeof(wavheader_t))
-				eputs("Bad format chunk");
-			else
-				skip(ck.size - sizeof(wavheader_t));
-		}
-		else if (chkid("data")) return ck.size;
-		else skip(ck.size);
-	}
-	eputs("Malformed RIFF file");
 	return 0;
 #undef skip
 #undef read2
