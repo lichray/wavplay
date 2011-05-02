@@ -113,14 +113,16 @@ int snd_play(FILE *fp, size_t n) {
 	snd_pcm_hw_params_get_channels(params, &nchannels);
 	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
 	unsigned char buf[BUF_SIZE * framesize];
-	size_t i = 0;
-	while (!feof(fp)) {
+	while (n > sizeof(buf)) {
 		fread(buf, sizeof(buf), 1, fp);
+		snd_pcm_writei(pcm, buf, sizeof(buf) / framesize);
 		snd_pcm_prepare(pcm);
-		snd_pcm_writei(pcm, buf, (n - i < sizeof(buf) ?
-				n - i : sizeof(buf)) / framesize);
-		i += sizeof(buf);
+		n -= sizeof(buf);
 	}
+	fread(buf, n, 1, fp);
+	snd_pcm_writei(pcm, buf, n / framesize);
+	if (feof(fp))
+		eputs("Unexpected end of stream");
 	return snd_pcm_drain(pcm);
 }
 
