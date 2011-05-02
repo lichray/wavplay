@@ -123,11 +123,11 @@ int snd_play(FILE *fp, size_t n) {
 
 #endif
 
-int wav_getfmt(const wavheader_t *header) {
-	switch (header->comptype) {
+int wav_getformat(const wavheader_t *wav) {
+	switch (wav->comptype) {
 	case 1:
 	case -2:
-		switch ((header->bitdepth + 7) / 8) {
+		switch ((wav->bitdepth + 7) / 8) {
 		case 1: return WAV_FMT_8;
 		case 2: return WAV_FMT_16;
 #ifdef	WAV_FMT_24
@@ -144,9 +144,8 @@ int wav_getfmt(const wavheader_t *header) {
 	}
 }
 
-size_t wav_read(FILE *fp) {
+size_t wav_read(wavheader_t *wav, FILE *fp) {
 	riffchunk_t ck;
-	wavheader_t header;
 #define skip(n) (fseek(fp, (long) (n), SEEK_CUR))
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
@@ -170,37 +169,39 @@ size_t wav_read(FILE *fp) {
 			return 0;
 		}
 		else if (chkid("fmt ")) {
-			read2(header);
-			if (ck.size < sizeof(header))
+			fread(wav, sizeof(wavheader_t), 1, fp);
+			if (ck.size < sizeof(wavheader_t))
 				eputs("Bad format chunk");
 			else
-				skip(ck.size - sizeof(header));
+				skip(ck.size - sizeof(wavheader_t));
 		}
-		else if (chkid("data")) break;
+		else if (chkid("data")) return ck.size;
 		else skip(ck.size);
 	}
-	if (!chkid("data")) {
-		eputs("Malformed RIFF file");
-		return 0;
-	}
+	eputs("Malformed RIFF file");
+	return 0;
 #undef skip
 #undef read2
 #undef chkid
-	int format = wav_getfmt(&header);
+}
+
+int wav_setdev(const wavheader_t *wav) {
+	int format = wav_getformat(wav);
 	if (format < 0)
 		eputs("Unsupported PCM format");
-	else if (snd_set(format, header.nchannels, header.framerate))
+	else if (snd_set(format, wav->nchannels, wav->framerate))
 		eputs("Failed to setup the sound device");
-	else return ck.size;
-	return 0;
+	else return 0;
+	return -1;
 }
 
 int wav_play(const char *fn) {
 	FILE *fp = fn ? fopen(fn, "rb") : stdin;
 	int st = -1;
 	if (fp) {
-		size_t size = wav_read(fp);
-		if (size)
+		wavheader_t wav;
+		size_t size = wav_read(&wav, fp);
+		if (size && !wav_setdev(&wav))
 			st = snd_play(fp, size);
 		fclose(fp);
 	} else perror(__func__);
