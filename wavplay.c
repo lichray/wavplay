@@ -150,8 +150,8 @@ int wav_getformat(const wavheader_t *wav) {
 }
 
 #define skip(n) do { \
-	char c; \
-	fread(&c, sizeof(c), n, fp); \
+	char c[n]; \
+	fread(c, sizeof(c), 1, fp); \
 } while (0)
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
