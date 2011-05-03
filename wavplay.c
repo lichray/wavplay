@@ -10,6 +10,7 @@
 #include "wavplay.h"
 #include <string.h>
 #define BUF_SIZE	4096
+#define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
 #ifndef USE_ALSA
@@ -90,7 +91,7 @@ int snd_set(int format, int nchannels, int framerate) {
 	st |= snd_pcm_hw_params_set_format(pcm, params, format);
 	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
 	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
-	st |= snd_pcm_hw_params_set_periods(pcm, params, 4, 0);
+	st |= snd_pcm_hw_params_set_periods(pcm, params, PERIODS, 0);
 	st |= snd_pcm_hw_params(pcm, params);
 	return st;
 }
@@ -115,8 +116,12 @@ int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[period * framesize];
 	while (n > sizeof(buf)) {
 		fread(buf, sizeof(buf), 1, fp);
-		snd_pcm_writei(pcm, buf, period);
-		snd_pcm_prepare(pcm);
+		if (snd_pcm_writei(pcm, buf, period) == -EPIPE)
+#ifdef DEBUG
+			snd_pcm_recover(pcm, -EPIPE, 0);
+#else
+			snd_pcm_prepare(pcm);
+#endif
 		n -= sizeof(buf);
 	}
 	fread(buf, n, 1, fp);
