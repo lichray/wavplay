@@ -8,7 +8,7 @@
  * All rights reserved.
  *
  * Reference:
- * http://yannesposito.com/Scratch/en/blog/2010-10-14-Fun-with-wav/
+ * http://www.freshports.org/audio/waveplay/
  *
  * This file is distributed under the 2-clause BSD License.
  */
@@ -50,7 +50,7 @@ int wav_play(const char *filename);
 int wav_send(FILE *stream);
 
 int snd_init(void);
-int snd_set(int format,
+int snd_set(int format, /* OSS/ALSA format constant */
 	    int nchannels,
 	    int framerate);
 int snd_send(FILE *stream,
