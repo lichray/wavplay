@@ -89,10 +89,8 @@ int snd_set(int format, int nchannels, int framerate) {
 	st |= snd_pcm_hw_params_set_access(pcm, params, SND_PCM_ACCESS_RW_INTERLEAVED);
 	st |= snd_pcm_hw_params_set_format(pcm, params, format);
 	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
-	st |= snd_pcm_hw_params_set_rate_resample(pcm, params, 0);
 	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
 	st |= snd_pcm_hw_params_set_periods(pcm, params, 4, 0);
-	st |= snd_pcm_hw_params_set_buffer_size(pcm, params, BUF_SIZE);
 	st |= snd_pcm_hw_params(pcm, params);
 	return st;
 }
@@ -106,16 +104,18 @@ int snd_end(void) {
 int snd_send(FILE *fp, size_t n) {
 	snd_pcm_format_t format;
 	unsigned int nchannels;
+	snd_pcm_uframes_t period;
 	snd_pcm_hw_params_t *params;
 	snd_pcm_hw_params_alloca(&params);
 	snd_pcm_hw_params_current(pcm, params);
 	snd_pcm_hw_params_get_format(params, &format);
 	snd_pcm_hw_params_get_channels(params, &nchannels);
+	snd_pcm_hw_params_get_period_size(params, &period, 0);
 	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
-	unsigned char buf[BUF_SIZE * framesize];
+	unsigned char buf[period * framesize];
 	while (n > sizeof(buf)) {
 		fread(buf, sizeof(buf), 1, fp);
-		snd_pcm_writei(pcm, buf, sizeof(buf) / framesize);
+		snd_pcm_writei(pcm, buf, period);
 		snd_pcm_prepare(pcm);
 		n -= sizeof(buf);
 	}
