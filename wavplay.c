@@ -53,7 +53,7 @@ int snd_end(void) {
 
 int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
-	size_t l = 0;
+	size_t l;
 	while (n > sizeof(buf)) {
 		if ((l = fread(buf, 1, sizeof(buf), fp)))
 			write(devfd, buf, l);
@@ -116,20 +116,23 @@ int snd_send(FILE *fp, size_t n) {
 	snd_pcm_hw_params_get_period_size(params, &period, 0);
 	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
 	unsigned char buf[period * framesize];
+	size_t l;
 	while (n > sizeof(buf)) {
-		fread(buf, sizeof(buf), 1, fp);
-		if (snd_pcm_writei(pcm, buf, period) == -EPIPE)
+		if ((l = fread(buf, 1, sizeof(buf), fp)))
+			if (snd_pcm_writei(pcm, buf, l / framesize) == -EPIPE)
 #ifdef DEBUG
-			snd_pcm_recover(pcm, -EPIPE, 0);
+				snd_pcm_recover(pcm, -EPIPE, 0);
 #else
-			snd_pcm_prepare(pcm);
+				snd_pcm_prepare(pcm);
 #endif
-		n -= sizeof(buf);
+			else;
+		else goto EOS;
+		n -= l;
 	}
-	fread(buf, n, 1, fp);
-	snd_pcm_writei(pcm, buf, n / framesize);
-	if (feof(fp))
-		eputs("Unexpected end of stream");
+	if ((l = fread(buf, 1, n, fp)))
+		snd_pcm_writei(pcm, buf, l / framesize);
+	if (l < n)
+		EOS: eputs("Unexpected end of stream");
 	return snd_pcm_drain(pcm);
 }
 
