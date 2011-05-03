@@ -1,6 +1,7 @@
 /*
  * This is sample program using wavplay.
  * It plays multiple WAV files.
+ * If the filename is `-', it reads from standard input.
  */
 
 #include "wavplay.h"

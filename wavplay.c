@@ -149,11 +149,15 @@ int wav_getformat(const wavheader_t *wav) {
 	}
 }
 
-size_t wav_read(wavheader_t *wav, FILE *fp) {
-	riffchunk_t ck;
-#define skip(n) (fseek(fp, (long) (n), SEEK_CUR))
+#define skip(n) do { \
+	char c; \
+	fread(&c, sizeof(c), n, fp); \
+} while (0)
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
+
+size_t wav_read(wavheader_t *wav, FILE *fp) {
+	riffchunk_t ck;
 	if (!read2(ck) || !chkid("RIFF"))
 		eputs("Not an RIFF file");
 	else if (!read2(ck.id) || !chkid("WAVE"))
@@ -177,10 +181,11 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 		eputs("Malformed RIFF file");
 	}
 	return 0;
+}
+
 #undef skip
 #undef read2
 #undef chkid
-}
 
 int wav_setdev(const wavheader_t *wav) {
 	int format = wav_getformat(wav);
