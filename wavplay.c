@@ -53,15 +53,17 @@ int snd_end(void) {
 
 int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
+	size_t l = 0;
 	while (n > sizeof(buf)) {
-		fread(buf, sizeof(buf), 1, fp);
-		write(devfd, buf, sizeof(buf));
-		n -= sizeof(buf);
+		if ((l = fread(buf, 1, sizeof(buf), fp)))
+			write(devfd, buf, l);
+		else goto EOS;
+		n -= l;
 	}
-	fread(buf, n, 1, fp);
-	write(devfd, buf, n);
-	if (feof(fp))
-		eputs("Unexpected end of stream");
+	if ((l = fread(buf, 1, n, fp)))
+		write(devfd, buf, l);
+	if (l < n)
+		EOS: eputs("Unexpected end of stream");
 	return ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
 }
 
