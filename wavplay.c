@@ -15,18 +15,19 @@
 
 #ifndef USE_ALSA
 
-#define WAV_FMT_8	AFMT_U8;
-#define WAV_FMT_16	AFMT_S16_LE;
+#define WAV_FMT_8	AFMT_U8
+#define WAV_FMT_16	AFMT_S16_LE
 #ifdef	AFMT_S24_PACKED
-#define WAV_FMT_24	AFMT_S24_PACKED;
+#define WAV_FMT_24	AFMT_S24_PACKED
 #elif	__FreeBSD__
-#define WAV_FMT_24	AFMT_S24_LE;
+#define WAV_FMT_24	AFMT_S24_LE
 #endif
 #ifdef	AFMT_S32_LE
-#define WAV_FMT_32	AFMT_S32_LE;
+#define WAV_FMT_32	AFMT_S32_LE
 #endif
-#define WAV_FMT_A_LAW	AFMT_A_LAW;
-#define WAV_FMT_MU_LAW	AFMT_MU_LAW;
+#define WAV_FMT_A_LAW	AFMT_A_LAW
+#define WAV_FMT_MU_LAW	AFMT_MU_LAW
+#define WAV_FMT_IMA_ADPCM	AFMT_IMA_ADPCM
 
 static int devfd = -1;
 
@@ -69,12 +70,13 @@ int snd_send(FILE *fp, size_t n) {
 
 #else
 
-#define WAV_FMT_8	SND_PCM_FORMAT_U8;
-#define WAV_FMT_16	SND_PCM_FORMAT_S16_LE;
-#define WAV_FMT_24	SND_PCM_FORMAT_S24_3LE;
-#define WAV_FMT_32	SND_PCM_FORMAT_S32_LE;
-#define WAV_FMT_A_LAW	SND_PCM_FORMAT_A_LAW;
-#define WAV_FMT_MU_LAW	SND_PCM_FORMAT_MU_LAW;
+#define WAV_FMT_8	SND_PCM_FORMAT_U8
+#define WAV_FMT_16	SND_PCM_FORMAT_S16_LE
+#define WAV_FMT_24	SND_PCM_FORMAT_S24_3LE
+#define WAV_FMT_32	SND_PCM_FORMAT_S32_LE
+#define WAV_FMT_A_LAW	SND_PCM_FORMAT_A_LAW
+#define WAV_FMT_MU_LAW	SND_PCM_FORMAT_MU_LAW
+#define WAV_FMT_IMA_ADPCM	SND_PCM_FORMAT_IMA_ADPCM
 
 static snd_pcm_t *pcm = NULL;
 
@@ -120,7 +122,7 @@ int snd_send(FILE *fp, size_t n) {
 	while (n > sizeof(buf)) {
 		if ((l = fread(buf, 1, sizeof(buf), fp)))
 			if (snd_pcm_writei(pcm, buf, l / framesize) == -EPIPE)
-#ifdef DEBUG
+#ifndef NDEBUG
 				snd_pcm_recover(pcm, -EPIPE, 0);
 #else
 				snd_pcm_prepare(pcm);
@@ -153,8 +155,11 @@ int wav_getformat(const wavheader_t *wav) {
 #endif
 		default: return -1;
 		}
+	case 258:
 	case 6: return WAV_FMT_A_LAW;
+	case 257:
 	case 7: return WAV_FMT_MU_LAW;
+	case 17: return wav->bitdepth == 4 ? WAV_FMT_IMA_ADPCM : -1;
 	default: return -1;
 	}
 }
