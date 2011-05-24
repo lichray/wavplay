@@ -55,6 +55,7 @@ int snd_set(int format, /* OSS/ALSA format constant */
 	    int framerate);
 int snd_send(FILE *stream,
 	     size_t size);
+int snd_drop(void);
 int snd_end(void);
 
 #endif

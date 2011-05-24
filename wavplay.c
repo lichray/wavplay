@@ -9,6 +9,7 @@
 
 #include "wavplay.h"
 #include <string.h>
+#include <errno.h>
 #define BUF_SIZE	4096
 #define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -38,6 +39,13 @@ int snd_init(void) {
 }
 
 int snd_set(int format, int nchannels, int framerate) {
+	if (devfd > -1) {
+		fcntl(devfd, F_GETFD);
+		if (errno == EBADF) {
+			devfd = -1;
+			snd_init();
+		}
+	}
 	int st = 0;
 	st |= ioctl(devfd, SNDCTL_DSP_RESET, NULL);
 	st |= ioctl(devfd, SNDCTL_DSP_SETFMT, &format);
@@ -66,6 +74,10 @@ int snd_send(FILE *fp, size_t n) {
 	if (l < n)
 		EOS: eputs("Unexpected end of stream");
 	return ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
+}
+
+int snd_drop(void) {
+	return close(devfd);
 }
 
 #else
@@ -120,14 +132,18 @@ int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[period * framesize];
 	size_t l;
 	while (n > sizeof(buf)) {
-		if ((l = fread(buf, 1, sizeof(buf), fp)))
-			if (snd_pcm_writei(pcm, buf, l / framesize) == -EPIPE)
+		if ((l = fread(buf, 1, sizeof(buf), fp))) {
+			switch (snd_pcm_writei(pcm, buf, l / framesize)) {
+			case -EBADF:
+				return -1;
+			case -EPIPE:
 #ifndef NDEBUG
 				snd_pcm_recover(pcm, -EPIPE, 0);
 #else
 				snd_pcm_prepare(pcm);
 #endif
-			else;
+			}
+		}
 		else goto EOS;
 		n -= l;
 	}
@@ -136,6 +152,10 @@ int snd_send(FILE *fp, size_t n) {
 	if (l < n)
 		EOS: eputs("Unexpected end of stream");
 	return snd_pcm_drain(pcm);
+}
+
+int snd_drop(void) {
+	return snd_pcm_drop(pcm);
 }
 
 #endif

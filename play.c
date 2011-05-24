@@ -8,6 +8,14 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <string.h>
+#include <signal.h>
+
+void main_stop(int sig) {
+#ifdef SIGQUIT
+	if (sig == SIGQUIT)
+		snd_drop();
+#endif
+}
 
 int main(int argc, char *argv[]) {
 	char *prog = basename(argv[0]);
@@ -16,9 +24,13 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	if (snd_init() < 0) {
-		fprintf(stderr, "%s: Failed to open device `" DEV_NAME "'\n", prog);
+		fprintf(stderr, "%s: Failed to open device `"
+				DEV_NAME "'\n", prog);
 		return 1;
 	}
+#ifdef SIGQUIT
+	signal(SIGQUIT, main_stop);
+#endif
 	int i = 1;
 	while (1) {
 		const char *fn = argv[i++];
