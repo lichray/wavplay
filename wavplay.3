@@ -1,6 +1,6 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-05-01" "0.4" ""
+.TH WAVPLAY 3 "2011-05-24" "0.4" ""
 .SH NAME
 wavplay \- a C library to play WAV sound via OSS/ALSA
 .
@@ -45,18 +45,21 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 
 \fIint\fP
 \fBsnd_end\fP(\fIvoid\fP);
+
+\fIint\fP
+\fBsnd_drop\fP(\fIvoid\fP);
 .fi
 .sp
 .SH DESCRIPTION
 .sp
-The \fBsnd_init()\fP function is required to be called before any other operations. Until the \fBsnd_end()\fP function is called or the program is quit, the sound device reminds open.
+The \fBsnd_init()\fP initializes the sound device. Until the \fBsnd_end()\fP function is called or the program is quit, the device reminds open. The \fBsnd_drop()\fP function stops the device from playing.
 .sp
 The \fBwav_play()\fP function opens and plays a WAV sound file, and the \fBwav_send()\fP function plays a WAV data stream. The sound device will be set according to the sampling format.
 .sp
-If the macro \fBUSE_ALSA\fP is defined, \fIwavplay\fP uses ALSA instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM name is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
+If the macro \fBUSE_ALSA\fP is defined, ALSA is used instead of OSS as the backend. The default OSS device is \fI/dev/dsp\fP, and the default ALSA PCM name is \fIdefault\fP. They are defined by the macro \fBDEV_NAME\fP.
 .SH RETURN VALUES
 .sp
-The \fBsnd_init()\fP and \fBsnd_end()\fP functions return a non\-negative integer if successful. The actual value is different for OSS/ALSA.
+The \fBsnd_init()\fP, \fBsnd_end()\fP, and \fBsnd_drop()\fP functions return a non\-negative integer if successful. The actual value is different for OSS/ALSA.
 .sp
 The \fBwav_play()\fP and \fBwav_send()\fP functions return the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
 .SH BUGS
