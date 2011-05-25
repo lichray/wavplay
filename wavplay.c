@@ -161,7 +161,7 @@ int snd_drop(void) {
 #endif
 
 int wav_getformat(const wavheader_t *wav) {
-	switch (wav->comptype) {
+	switch (wav->format) {
 	case 1:
 	case -2:
 		switch ((wav->bitdepth + 7) / 8) {

@@ -38,13 +38,22 @@ typedef struct _riffchunk {
 } riffchunk_t;
 
 typedef struct _wavheader {
-	int16_t	comptype;
+	int16_t	format;
 	int16_t	nchannels;
 	int32_t	framerate;
 	int32_t	byterate;
 	int16_t	blocksize;
 	int16_t	bitdepth;
 } wavheader_t;
+
+typedef struct _aifheader {
+	int16_t	nchannels;
+	int32_t	nframes;
+	int16_t	bitdepth;
+	char	framerate[10]; /* 80-bit IEEE 754 */
+	char	comptype[4];
+} aifheader_t;
+
 
 int wav_play(const char *filename);
 int wav_send(FILE *stream);
