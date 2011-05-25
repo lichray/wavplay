@@ -2,6 +2,8 @@
 
 TAGS := exctags
 PROGRAM := wavplay
+CFLAGS += -Wall
+LDFLAGS += -lm
 
 .PHONY : all clean
 all : $(PROGRAM)

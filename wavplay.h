@@ -46,13 +46,27 @@ typedef struct _wavheader {
 	int16_t	bitdepth;
 } wavheader_t;
 
+typedef struct _extdouble {
+	int16_t	expon;
+	uint32_t	himant;
+	uint32_t	lomant;
+} extdouble_t;
+
 typedef struct _aifheader {
 	int16_t	nchannels;
 	int32_t	nframes;
 	int16_t	bitdepth;
-	char	framerate[10]; /* 80-bit IEEE 754 */
+	extdouble_t	framerate;
 	char	comptype[4];
 } aifheader_t;
+
+typedef struct _wav_info {
+	short	nchannels;
+	int	nframes;
+	short	sampwidth;
+	int	framerate;
+	int	devformat;
+} wav_info_t;
 
 
 int wav_play(const char *filename);

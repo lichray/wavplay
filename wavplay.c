@@ -10,6 +10,7 @@
 #include "wavplay.h"
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 #define BUF_SIZE	4096
 #define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -160,7 +161,7 @@ int snd_drop(void) {
 
 #endif
 
-int wav_getformat(const wavheader_t *wav) {
+int wav2format(const wavheader_t *wav) {
 	switch (wav->format) {
 	case 1:
 	case -2:
@@ -184,6 +185,25 @@ int wav_getformat(const wavheader_t *wav) {
 	}
 }
 
+int aif2format(aifheader_t *aif) {
+	return -1;
+}
+
+long double ext2l(extdouble_t x) {
+	int sign = 1;
+	if (x.expon < 0) {
+		sign = -1;
+		x.expon += 0x8000;
+	}
+	if (x.expon == 0 && x.expon == x.himant && x.himant == x.lomant)
+		return 0.0;
+	else if (x.expon == 0x7FFF)
+		return HUGE_VAL * sign;
+	else
+		return (x.himant * 0x100000000L + x.lomant) *
+			(long double) pow(2.0, x.expon - 63) * sign;
+}
+
 #define skip(n) do { \
 	char c[n]; \
 	fread(c, sizeof(c), 1, fp); \
@@ -191,11 +211,9 @@ int wav_getformat(const wavheader_t *wav) {
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
 
-size_t wav_read(wavheader_t *wav, FILE *fp) {
+size_t wavparse(wavheader_t *wav, FILE *fp) {
 	riffchunk_t ck;
-	if (!read2(ck) || !chkid("RIFF"))
-		eputs("Not an RIFF file");
-	else if (!read2(ck.id) || !chkid("WAVE"))
+	if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
 	else {
 		while (read2(ck))
@@ -218,24 +236,55 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 	return 0;
 }
 
+size_t aifparse(aifheader_t *aif, FILE *fp) {
+	return 0;
+}
+
+size_t wav_readinfo(wav_info_t *info, FILE *fp) {
+	riffchunk_t ck;
+	if (read2(ck)) {
+		if (chkid("RIFF")) {
+			wavheader_t wav[1];
+			size_t sz = wavparse(wav, fp);
+			info->nchannels = wav->nchannels;
+			info->framerate = wav->framerate;
+			info->sampwidth = (wav->bitdepth + 7) / 8;
+			info->nframes = sz / (info->nchannels * info->sampwidth);
+			info->devformat = wav2format(wav);
+			return sz;
+		}
+		else if (chkid("FORM")) {
+			aifheader_t aif[1];
+			size_t sz = aifparse(aif, fp);
+			info->nchannels = aif->nchannels;
+			info->framerate = (int) ext2l(aif->framerate);
+			info->sampwidth = (aif->bitdepth + 7) / 8;
+			info->nframes = aif->nframes;
+			info->devformat = aif2format(aif);
+			return sz;
+		}
+	}
+	eputs("Unknown file format");
+	return 0;
+}
+
 #undef skip
 #undef read2
 #undef chkid
 
-int wav_setdev(const wavheader_t *wav) {
-	int format = wav_getformat(wav);
-	if (format < 0)
+int wav_setdev(const wav_info_t *info) {
+	if (info->devformat < 0)
 		eputs("Unsupported PCM format");
-	else if (snd_set(format, wav->nchannels, wav->framerate))
+	else if (snd_set(info->devformat, info->nchannels, info->framerate))
 		eputs("Failed to setup the sound device");
 	else return 0;
 	return -1;
 }
 
 int wav_send(FILE *fp) {
-	wavheader_t wav[1];
-	size_t size = wav_read(wav, fp);
-	if (size && !wav_setdev(wav))
+	wav_info_t info[1];
+	size_t size = wav_readinfo(info, fp);
+	if (size && !wav_setdev(info))
 		return snd_send(fp, size);
 	return -1;
 }
