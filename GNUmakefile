@@ -5,12 +5,10 @@ PROGRAM := wavplay
 CFLAGS += -Wall
 PREFIX := /usr/local
 
-.ifdef WITH_ALSA
-alsa_CFLAGS != pkg-config --cflags alsa
-alsa_LDFLAGS != pkg-config --libs alsa
-CFLAGS += $(alsa_CFLAGS) -DUSE_ALSA
-LDFLAGS += $(alsa_LDFLAGS)
-.endif
+ifdef WITH_ALSA
+CFLAGS += $(shell pkg-config --cflags alsa) -DUSE_ALSA
+LDFLAGS += $(shell pkg-config --libs alsa)
+endif
 
 .PHONY : all clean
 all : $(PROGRAM)
