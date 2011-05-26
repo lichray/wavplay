@@ -20,7 +20,9 @@
 #ifndef USE_ALSA
 
 #define WAV_FMT_8	AFMT_U8
+#define AIF_FMT_8	AFMT_S8
 #define WAV_FMT_16	AFMT_S16_LE
+#define AIF_FMT_16	AFMT_S16_BE
 #ifdef	AFMT_S24_PACKED
 #define WAV_FMT_24	AFMT_S24_PACKED
 #elif	__FreeBSD__
@@ -28,6 +30,7 @@
 #endif
 #ifdef	AFMT_S32_LE
 #define WAV_FMT_32	AFMT_S32_LE
+#define AIF_FMT_32	AFMT_S32_BE
 #endif
 #define WAV_FMT_A_LAW	AFMT_A_LAW
 #define WAV_FMT_MU_LAW	AFMT_MU_LAW
@@ -86,9 +89,12 @@ int snd_drop(void) {
 #else
 
 #define WAV_FMT_8	SND_PCM_FORMAT_U8
+#define AIF_FMT_8	SND_PCM_FORMAT_S8
 #define WAV_FMT_16	SND_PCM_FORMAT_S16_LE
+#define AIF_FMT_16	SND_PCM_FORMAT_S16_BE
 #define WAV_FMT_24	SND_PCM_FORMAT_S24_3LE
 #define WAV_FMT_32	SND_PCM_FORMAT_S32_LE
+#define AIF_FMT_32	SND_PCM_FORMAT_S32_BE
 #define WAV_FMT_A_LAW	SND_PCM_FORMAT_A_LAW
 #define WAV_FMT_MU_LAW	SND_PCM_FORMAT_MU_LAW
 #define WAV_FMT_IMA_ADPCM	SND_PCM_FORMAT_IMA_ADPCM
@@ -187,8 +193,29 @@ int wav2format(const wavheader_t *wav) {
 	}
 }
 
+#define chktype(s) (!strncmp(aif->comptype, s, 4))
+
 int aif2format(aifheader_t *aif) {
-	return -1;
+	if (chktype("") || chktype("NONE"))
+		switch ((ntohs(aif->bitdepth) + 7) / 8) {
+		case 1: return AIF_FMT_8;
+		case 2: return AIF_FMT_16;
+#ifdef	WAV_FMT_24
+		case 3: return WAV_FMT_24;
+#endif
+#ifdef	AIF_FMT_32
+		case 4: return AIF_FMT_32;
+#endif
+		default: return -1;
+		}
+	else if (chktype("alaw"))
+		return WAV_FMT_A_LAW;
+	else if (chktype("ulaw"))
+		return WAV_FMT_MU_LAW;
+	else if (chktype("ima4"))
+		return WAV_FMT_IMA_ADPCM;
+	else
+		return -1;
 }
 
 long double ext2l(extdouble_t x) {
@@ -201,9 +228,10 @@ long double ext2l(extdouble_t x) {
 		return 0.0;
 	else if (x.expon == 0x7FFF)
 		return HUGE_VAL * sign;
-	else
-		return (x.himant * 0x100000000L + x.lomant) *
-			(long double) pow(2.0, x.expon - 63) * sign;
+	else {
+		long double ex = pow(2.0, x.expon - 16446) * sign;
+		return (x.himant * ex * 0x100000000L + x.lomant * ex);
+	}
 }
 
 #define skip(n) do { \
@@ -281,12 +309,15 @@ size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 			return sz;
 		}
 		else if (chkid("FORM")) {
-			aifheader_t aif[1];
+			aifheader_t aif[1] = {{ 0 }};
 			size_t sz = aifparse(aif, fp);
-			info->nchannels = aif->nchannels;
+			info->nchannels = ntohs(aif->nchannels);
+			aif->framerate.expon = ntohs(aif->framerate.expon);
+			aif->framerate.himant = ntohl(aif->framerate.himant);
+			aif->framerate.lomant = ntohl(aif->framerate.lomant);
 			info->framerate = (int) ext2l(aif->framerate);
-			info->sampwidth = (aif->bitdepth + 7) / 8;
-			info->nframes = aif->nframes;
+			info->sampwidth = (ntohs(aif->bitdepth) + 7) / 8;
+			info->nframes = ntohl(aif->nframes);
 			info->devformat = aif2format(aif);
 			return sz;
 		}
