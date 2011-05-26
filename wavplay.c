@@ -65,7 +65,8 @@ int snd_send(FILE *fp, size_t n) {
 	size_t l;
 	while (n > sizeof(buf)) {
 		if ((l = fread(buf, 1, sizeof(buf), fp)))
-			write(devfd, buf, l);
+			if (write(devfd, buf, l) < 0) return -1;
+			else;
 		else goto EOS;
 		n -= l;
 	}
