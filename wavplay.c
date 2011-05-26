@@ -10,6 +10,7 @@
 #include "wavplay.h"
 #include <string.h>
 #include <errno.h>
+#include <netinet/in.h>
 #define BUF_SIZE	4096
 #define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -185,6 +186,47 @@ int wav_getformat(const wavheader_t *wav) {
 	}
 }
 
+/*
+ * converts any endianess to host
+ * returns -1 when format is wrong,
+ *          0 when no convertion is needed,
+ *          positive value == len(fmt).
+ */
+int endian2h(const char fmt[], void *p) {
+	if (htonl(1) == 1) {
+		if (fmt[0] == '>') return 0;
+		else if (fmt[0] != '<') return -1;
+	} else {
+		if (fmt[0] == '<') return 0;
+		else if (fmt[0] != '>') return -1;
+	}
+	const char *i = fmt;
+	while (*(++i) != '\0') {
+#define fmtInt(x, T) \
+	case x: { \
+		uint##T##_t *n = p; \
+		*n = bswap##T(*n); \
+		p += sizeof(uint##T##_t); \
+		break; \
+	}
+#define fmtSkip(x, n) \
+	case x: { \
+		p += n; \
+		break; \
+	}
+		switch (*i) {
+			fmtInt('h', 16);
+			fmtInt('l', 32);
+			fmtInt('q', 64);
+			fmtSkip('.', 1);
+		default : return -1;
+		}
+#undef fmtInt
+#undef fmtSkip
+	}
+	return i - fmt;
+}
+
 #define skip(n) do { \
 	char c[BUF_SIZE]; \
 	size_t i = n; \
@@ -206,11 +248,13 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 		eputs("Not a WAVE file");
 	else {
 		while (read2(ck)) {
+			endian2h("<l", &ck.size);
 			if (chkid("data"))
 				return ck.size;
 			ck.size = (ck.size + 1) / 2 * 2;
 			if (chkid("fmt ")) {
 				fread(wav, sizeof(wavheader_t), 1, fp);
+				endian2h("<hhllhh", wav);
 				if (ck.size < sizeof(wavheader_t))
 					eputs("Bad format chunk");
 				else
