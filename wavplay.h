@@ -81,4 +81,29 @@ int snd_send(FILE *stream,
 int snd_drop(void);
 int snd_end(void);
 
+/* Reference: FreeBSD /usr/include/sys/endian.h */
+
+#ifndef bswap16
+
+#define _bswap64(x) \
+__extension__ ({ register __uint64_t __X = (x); \
+   __asm ("bswap %0" : "+r" (__X)); \
+   __X; })
+
+#define _bswap32(x) \
+__extension__ ({ register __uint32_t __X = (x); \
+   __asm ("bswap %0" : "+r" (__X)); \
+   __X; })
+
+static __inline __uint64_t
+bswap64(__uint64_t _x) { return (_bswap64(_x)); }
+
+static __inline __uint32_t
+bswap32(__uint32_t _x) { return (_bswap32(_x)); }
+
+static __inline __uint16_t
+bswap16(__uint16_t _x) { return (_x << 8 | _x >> 8); }
+
+#endif
+
 #endif

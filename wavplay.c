@@ -197,7 +197,7 @@ int wav2format(const wavheader_t *wav) {
 
 int aif2format(aifheader_t *aif) {
 	if (chktype("") || chktype("NONE"))
-		switch ((ntohs(aif->bitdepth) + 7) / 8) {
+		switch ((aif->bitdepth + 7) / 8) {
 		case 1: return AIF_FMT_8;
 		case 2: return AIF_FMT_16;
 #ifdef	WAV_FMT_24
@@ -216,6 +216,47 @@ int aif2format(aifheader_t *aif) {
 		return WAV_FMT_IMA_ADPCM;
 	else
 		return -1;
+}
+
+/*
+ * converts any endianess to host
+ * returns -1 when format is wrong,
+ *          0 when no convertion is needed,
+ *          positive value == len(fmt).
+ */
+int endian2h(const char fmt[], void *p) {
+	if (htonl(1) == 1) {
+		if (fmt[0] == '>') return 0;
+		else if (fmt[0] != '<') return -1;
+	} else {
+		if (fmt[0] == '<') return 0;
+		else if (fmt[0] != '>') return -1;
+	}
+	const char *i = fmt;
+	while (*(++i) != '\0') {
+#define fmtInt(x, T) \
+	case x: { \
+		uint##T##_t *n = p; \
+		*n = bswap##T(*n); \
+		p += sizeof(uint##T##_t); \
+		break; \
+	}
+#define fmtSkip(x, n) \
+	case x: { \
+		p += n; \
+		break; \
+	}
+		switch (*i) {
+			fmtInt('h', 16);
+			fmtInt('l', 32);
+			fmtInt('q', 64);
+			fmtSkip('.', 1);
+		default : return -1;
+		}
+#undef fmtInt
+#undef fmtSkip
+	}
+	return i - fmt;
 }
 
 long double ext2l(extdouble_t x) {
@@ -246,7 +287,8 @@ size_t wavparse(wavheader_t *wav, FILE *fp) {
 	if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
 	else {
-		while (read2(ck))
+		while (read2(ck)) {
+			endian2h("<l", &ck.size);
 			if (ck.size < 0) {
 				eputs("RIFF chunk size > 2GB");
 				return 0;
@@ -261,6 +303,7 @@ size_t wavparse(wavheader_t *wav, FILE *fp) {
 			else if (chkid("data"))
 				return ck.size;
 			else skip(ck.size);
+		}
 		eputs("Malformed RIFF file");
 	}
 	return 0;
@@ -272,7 +315,7 @@ size_t aifparse(aifheader_t *aif, FILE *fp) {
 		eputs("Not a AIFF/AIFC file");
 	else {
 		while (read2(ck)) {
-			ck.size = ntohl(ck.size);
+			endian2h(">l", &ck.size);
 			if (ck.size < 0) {
 				eputs("IFF chunk size > 2GB");
 				return 0;
@@ -301,6 +344,7 @@ size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 		if (chkid("RIFF")) {
 			wavheader_t wav[1];
 			size_t sz = wavparse(wav, fp);
+			endian2h("<hhllhh", wav);
 			info->nchannels = wav->nchannels;
 			info->framerate = wav->framerate;
 			info->sampwidth = (wav->bitdepth + 7) / 8;
@@ -311,13 +355,11 @@ size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 		else if (chkid("FORM")) {
 			aifheader_t aif[1] = {{ 0 }};
 			size_t sz = aifparse(aif, fp);
-			info->nchannels = ntohs(aif->nchannels);
-			aif->framerate.expon = ntohs(aif->framerate.expon);
-			aif->framerate.himant = ntohl(aif->framerate.himant);
-			aif->framerate.lomant = ntohl(aif->framerate.lomant);
+			endian2h(">hlhhll", aif);
+			info->nchannels = aif->nchannels;
 			info->framerate = (int) ext2l(aif->framerate);
-			info->sampwidth = (ntohs(aif->bitdepth) + 7) / 8;
-			info->nframes = ntohl(aif->nframes);
+			info->sampwidth = (aif->bitdepth + 7) / 8;
+			info->nframes = aif->nframes;
 			info->devformat = aif2format(aif);
 			return sz;
 		}
