@@ -185,8 +185,14 @@ int wav_getformat(const wavheader_t *wav) {
 }
 
 #define skip(n) do { \
-	char c[n]; \
-	fread(c, sizeof(c), 1, fp); \
+	char c[BUF_SIZE]; \
+	size_t i = n; \
+	ssize_t l; \
+	while (i > 0) { \
+		l = fread(c, 1, i > sizeof(c) ? sizeof(c) : i, fp); \
+		if (l > 0) i -= l; \
+		else break; \
+	} \
 } while (0)
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
@@ -199,10 +205,6 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 		eputs("Not a WAVE file");
 	else {
 		while (read2(ck)) {
-			if (ck.size < 0) {
-				eputs("RIFF chunk size > 2GB");
-				return 0;
-			}
 			if (chkid("data"))
 				return ck.size;
 			ck.size = (ck.size + 1) / 2 * 2;

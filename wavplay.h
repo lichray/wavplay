@@ -34,7 +34,7 @@
 
 typedef struct _riffchunk {
 	char	id[4];
-	int32_t	size;
+	uint32_t	size;
 } riffchunk_t;
 
 typedef struct _wavheader {
