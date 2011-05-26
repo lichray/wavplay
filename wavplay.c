@@ -283,8 +283,14 @@ static long double ext2l(extdouble_t x) {
 }
 
 #define skip(n) do { \
-	char c[n]; \
-	fread(c, sizeof(c), 1, fp); \
+	char c[BUF_SIZE]; \
+	size_t i = n; \
+	ssize_t l; \
+	while (i > 0) { \
+		l = fread(c, 1, i > sizeof(c) ? sizeof(c) : i, fp); \
+		if (l > 0) i -= l; \
+		else break; \
+	} \
 } while (0)
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
@@ -296,10 +302,6 @@ static size_t wavparse(wavheader_t *wav, FILE *fp) {
 	else {
 		while (read2(ck)) {
 			endian2h("<l", &ck.size);
-			if (ck.size < 0) {
-				eputs("RIFF chunk size > 2GB");
-				return 0;
-			}
 			if (chkid("data"))
 				return ck.size;
 			ck.size = (ck.size + 1) / 2 * 2;
@@ -324,10 +326,6 @@ static size_t aifparse(aifheader_t *aif, FILE *fp) {
 	else {
 		while (read2(ck)) {
 			endian2h(">l", &ck.size);
-			if (ck.size < 0) {
-				eputs("IFF chunk size > 2GB");
-				return 0;
-			}
 			if (chkid("SSND"))
 				return ck.size;
 			ck.size = (ck.size + 1) / 2 * 2;

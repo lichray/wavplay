@@ -7,7 +7,7 @@ a C library to play WAV sound via OSS/ALSA
 -------------------------------------------
 
 :Author: Zhihao Yuan <lichray@gmail.com>
-:Date:   2011-05-24
+:Date:   2011-05-26
 :Copyright: 2-clause BSD License
 :Version: 0.4
 :Manual section: 3
@@ -50,5 +50,5 @@ The ``wav_play()`` and ``wav_send()`` functions return the value 0 if the sound 
 BUGS
 =====
 
-This library does not support WAV files larger than 2GB.
+The unstable support to ALSA should be removed.
 

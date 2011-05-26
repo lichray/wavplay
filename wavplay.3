@@ -1,6 +1,6 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-05-24" "0.4" ""
+.TH WAVPLAY 3 "2011-05-26" "0.4" ""
 .SH NAME
 wavplay \- a C library to play WAV sound via OSS/ALSA
 .
@@ -64,7 +64,7 @@ The \fBsnd_init()\fP, \fBsnd_end()\fP, and \fBsnd_drop()\fP functions return a n
 The \fBwav_play()\fP and \fBwav_send()\fP functions return the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
 .SH BUGS
 .sp
-This library does not support WAV files larger than 2GB.
+The unstable support to ALSA should be removed.
 .SH AUTHOR
 Zhihao Yuan <lichray@gmail.com>
 .SH COPYRIGHT
