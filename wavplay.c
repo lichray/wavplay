@@ -284,6 +284,10 @@ static long double ext2l(extdouble_t x) {
 }
 
 #define skip(n) do { \
+	if (! fseek(fp, 0, SEEK_CUR)) { \
+		fseek(fp, (n), SEEK_CUR); \
+		break; \
+	} \
 	char c[BUF_SIZE]; \
 	size_t i = n; \
 	ssize_t l; \
