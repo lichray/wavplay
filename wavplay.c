@@ -198,22 +198,24 @@ size_t wav_read(wavheader_t *wav, FILE *fp) {
 	else if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
 	else {
-		while (read2(ck))
+		while (read2(ck)) {
 			if (ck.size < 0) {
 				eputs("RIFF chunk size > 2GB");
 				return 0;
 			}
-			else if (chkid("fmt ")) {
+			if (chkid("data"))
+				return ck.size;
+			ck.size = (ck.size + 1) / 2 * 2;
+			if (chkid("fmt ")) {
 				fread(wav, sizeof(wavheader_t), 1, fp);
 				if (ck.size < sizeof(wavheader_t))
 					eputs("Bad format chunk");
 				else
 					skip(ck.size - sizeof(wavheader_t));
 			}
-			else if (chkid("data"))
-				return ck.size;
 			else skip(ck.size);
-		eputs("Malformed RIFF file");
+		}
+		eputs("Malformed WAVE file");
 	}
 	return 0;
 }

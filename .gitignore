@@ -1,6 +1,7 @@
 *.o
 *.swp
 *.wav
+*.aif
 *~
 wavplay
 tags
