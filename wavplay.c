@@ -196,8 +196,9 @@ int wav2format(const wavheader_t *wav) {
 #define chktype(s) (!strncmp(aif->comptype, s, 4))
 
 int aif2format(aifheader_t *aif) {
+	int sampwidth = (aif->bitdepth + 7) / 8;
 	if (chktype("") || chktype("NONE"))
-		switch ((aif->bitdepth + 7) / 8) {
+		switch (sampwidth) {
 		case 1: return AIF_FMT_8;
 		case 2: return AIF_FMT_16;
 #ifdef	WAV_FMT_24
@@ -208,6 +209,12 @@ int aif2format(aifheader_t *aif) {
 #endif
 		default: return -1;
 		}
+	else if (chktype("sowt")) {
+		if (sampwidth == 1)
+			return AIF_FMT_8;
+		return wav2format(&(wavheader_t)
+				{ .format = 1, .bitdepth = aif->bitdepth });
+	}
 	else if (chktype("alaw"))
 		return WAV_FMT_A_LAW;
 	else if (chktype("ulaw"))
