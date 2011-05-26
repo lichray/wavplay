@@ -50,7 +50,7 @@ typedef struct _extdouble {
 	int16_t	expon;
 	uint32_t	himant;
 	uint32_t	lomant;
-} extdouble_t;
+} __attribute__((__packed__)) extdouble_t;
 
 typedef struct _aifheader {
 	int16_t	nchannels;
@@ -58,7 +58,7 @@ typedef struct _aifheader {
 	int16_t	bitdepth;
 	extdouble_t	framerate;
 	char	comptype[4];
-} aifheader_t;
+} __attribute__((__packed__)) aifheader_t;
 
 typedef struct _wav_info {
 	short	nchannels;

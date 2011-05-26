@@ -11,6 +11,8 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <sys/param.h>
+#include <netinet/in.h>
 #define BUF_SIZE	4096
 #define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
@@ -237,6 +239,31 @@ size_t wavparse(wavheader_t *wav, FILE *fp) {
 }
 
 size_t aifparse(aifheader_t *aif, FILE *fp) {
+	riffchunk_t ck;
+	if (!read2(ck.id) || !(chkid("AIFF") || chkid("AIFC")))
+		eputs("Not a AIFF/AIFC file");
+	else {
+		while (read2(ck)) {
+			ck.size = ntohl(ck.size);
+			if (ck.size < 0) {
+				eputs("IFF chunk size > 2GB");
+				return 0;
+			}
+			if (chkid("SSND"))
+				return ck.size;
+			ck.size = (ck.size + 1) / 2 * 2;
+			if (chkid("COMM")) {
+				int ckl = MIN(ck.size, sizeof(aifheader_t));
+				fread(aif, ckl, 1, fp);
+				if (ckl < (sizeof(aifheader_t) - sizeof(aif->comptype)))
+					eputs("Bad common chunk");
+				else
+					skip(ck.size - ckl);
+			}
+			else skip(ck.size);
+		}
+		eputs("Malformed AIFF/AIFC file");
+	}
 	return 0;
 }
 
