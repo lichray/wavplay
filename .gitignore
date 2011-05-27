@@ -2,6 +2,7 @@
 *.swp
 *.wav
 *.aif
+*.aif[c,f]
 *~
 wavplay
 tags

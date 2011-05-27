@@ -215,9 +215,9 @@ int aif2format(aifheader_t *aif) {
 		return wav2format(&(wavheader_t)
 				{ .format = 1, .bitdepth = aif->bitdepth });
 	}
-	else if (chktype("alaw"))
+	else if (chktype("alaw") || chktype("ALAW"))
 		return WAV_FMT_A_LAW;
-	else if (chktype("ulaw"))
+	else if (chktype("ulaw") || chktype("ULAW"))
 		return WAV_FMT_MU_LAW;
 	else if (chktype("ima4"))
 		return WAV_FMT_IMA_ADPCM;
