@@ -278,7 +278,7 @@ long double ext2l(extdouble_t x) {
 		return HUGE_VAL * sign;
 	else {
 		long double ex = pow(2.0, x.expon - 16446) * sign;
-		return (x.himant * ex * 0x100000000L + x.lomant * ex);
+		return (x.himant * ex * (2L << 29)) * 4 + x.lomant * ex;
 	}
 }
 
