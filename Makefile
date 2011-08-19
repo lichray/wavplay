@@ -2,7 +2,7 @@
 
 TAGS := exctags
 PROGRAM := wavplay
-CFLAGS += -Wall
+CFLAGS += -Wall -Wmissing-prototypes
 LDFLAGS += -lm
 
 .PHONY : all clean

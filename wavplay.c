@@ -169,7 +169,7 @@ int snd_drop(void) {
 
 #endif
 
-int wav2format(const wavheader_t *wav) {
+static int wav2format(const wavheader_t *wav) {
 	switch (wav->format) {
 	case 1:
 	case -2:
@@ -195,7 +195,7 @@ int wav2format(const wavheader_t *wav) {
 
 #define chktype(s) (!strncmp(aif->comptype, s, 4))
 
-int aif2format(aifheader_t *aif) {
+static int aif2format(aifheader_t *aif) {
 	int sampwidth = (aif->bitdepth + 7) / 8;
 	if (chktype("") || chktype("NONE"))
 		switch (sampwidth) {
@@ -231,7 +231,7 @@ int aif2format(aifheader_t *aif) {
  *          0 when no convertion is needed,
  *          positive value == len(fmt).
  */
-int endian2h(const char fmt[], void *p) {
+static int endian2h(const char fmt[], void *p) {
 	if (htonl(1) == 1) {
 		if (fmt[0] == '>') return 0;
 		else if (fmt[0] != '<') return -1;
@@ -266,7 +266,7 @@ int endian2h(const char fmt[], void *p) {
 	return i - fmt;
 }
 
-long double ext2l(extdouble_t x) {
+static long double ext2l(extdouble_t x) {
 	int sign = 1;
 	if (x.expon < 0) {
 		sign = -1;
@@ -289,7 +289,7 @@ long double ext2l(extdouble_t x) {
 #define read2(t) (fread(&t, sizeof(t), 1, fp))
 #define chkid(s) (!strncmp(ck.id, s, 4))
 
-size_t wavparse(wavheader_t *wav, FILE *fp) {
+static size_t wavparse(wavheader_t *wav, FILE *fp) {
 	riffchunk_t ck;
 	if (!read2(ck.id) || !chkid("WAVE"))
 		eputs("Not a WAVE file");
@@ -316,7 +316,7 @@ size_t wavparse(wavheader_t *wav, FILE *fp) {
 	return 0;
 }
 
-size_t aifparse(aifheader_t *aif, FILE *fp) {
+static size_t aifparse(aifheader_t *aif, FILE *fp) {
 	riffchunk_t ck;
 	if (!read2(ck.id) || !(chkid("AIFF") || chkid("AIFC")))
 		eputs("Not a AIFF/AIFC file");
@@ -345,7 +345,7 @@ size_t aifparse(aifheader_t *aif, FILE *fp) {
 	return 0;
 }
 
-size_t wav_readinfo(wav_info_t *info, FILE *fp) {
+static size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 	riffchunk_t ck;
 	if (read2(ck)) {
 		if (chkid("RIFF")) {
@@ -379,7 +379,7 @@ size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 #undef read2
 #undef chkid
 
-int wav_setdev(const wav_info_t *info) {
+static int wav_setdev(const wav_info_t *info) {
 	if (info->devformat < 0)
 		eputs("Unsupported PCM format");
 	else if (snd_set(info->devformat, info->nchannels, info->framerate))

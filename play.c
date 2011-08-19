@@ -10,7 +10,7 @@
 #include <string.h>
 #include <signal.h>
 
-void main_stop(int sig) {
+static void main_stop(int sig) {
 #ifdef SIGQUIT
 	if (sig == SIGQUIT)
 		snd_drop();
