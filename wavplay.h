@@ -75,6 +75,9 @@ typedef struct _wav_info {
 	int	devformat;
 } wav_info_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int wav_play(const char *filename);
 int wav_send(FILE *stream);
@@ -87,6 +90,10 @@ int snd_send(FILE *stream,
 	     size_t size);
 int snd_drop(void);
 int snd_end(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 /* Reference: FreeBSD /usr/include/sys/endian.h */
 
