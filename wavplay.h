@@ -60,6 +60,13 @@ typedef struct _aifheader {
 	char	comptype[4];
 } __attribute__((__packed__)) aifheader_t;
 
+typedef struct _sunheader {
+	uint32_t	size;
+	int32_t	encoding;
+	int32_t	framerate;
+	int32_t	nchannels;
+} __attribute__((__packed__)) sunheader_t;
+
 typedef struct _wav_info {
 	short	nchannels;
 	int	nframes;

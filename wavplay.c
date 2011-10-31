@@ -27,6 +27,7 @@
 #define WAV_FMT_24	AFMT_S24_PACKED
 #elif	__FreeBSD__
 #define WAV_FMT_24	AFMT_S24_LE
+#define SUN_FMT_24	AFMT_S24_BE
 #endif
 #ifdef	AFMT_S32_LE
 #define WAV_FMT_32	AFMT_S32_LE
@@ -94,6 +95,7 @@ int snd_drop(void) {
 #define WAV_FMT_16	SND_PCM_FORMAT_S16_LE
 #define AIF_FMT_16	SND_PCM_FORMAT_S16_BE
 #define WAV_FMT_24	SND_PCM_FORMAT_S24_3LE
+#define SUN_FMT_24	SND_PCM_FORMAT_S24_3BE
 #define WAV_FMT_32	SND_PCM_FORMAT_S32_LE
 #define AIF_FMT_32	SND_PCM_FORMAT_S32_BE
 #define WAV_FMT_A_LAW	SND_PCM_FORMAT_A_LAW
@@ -224,6 +226,20 @@ static int aif2format(aifheader_t *aif) {
 		return WAV_FMT_IMA_ADPCM;
 	else
 		return -1;
+}
+
+static int sun2format(sunheader_t *sun) {
+	switch (sun->encoding) {
+	case 1: return WAV_FMT_MU_LAW;
+	case 2: return AIF_FMT_8;
+	case 3: return AIF_FMT_16;
+#ifdef SUN_FMT_24
+	case 4: return SUN_FMT_24;
+#endif
+	case 5: return AIF_FMT_32;
+	case 27: return WAV_FMT_A_LAW;
+	default: return -1;
+	}
 }
 
 /*
@@ -373,6 +389,27 @@ static size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 			info->nframes = aif->nframes;
 			info->devformat = aif2format(aif);
 			return sz;
+		}
+		else if (chkid(".snd")) {
+			sunheader_t sun;
+			endian2h(">l", &ck.size);
+			read2(sun);
+			endian2h(">llll", &sun);
+			if (ck.size < sizeof(ck) + sizeof(sun))
+				eputs("Bad Au header");
+			else
+				skip(ck.size - sizeof(ck) - sizeof(sun));
+			info->nchannels = sun.nchannels;
+			info->framerate = sun.framerate;
+			if (1 < sun.encoding || sun.encoding < 6)
+				info->nframes = sun.size /
+					(info->sampwidth = sun.encoding - 1);
+			else {
+				info->sampwidth = 2;
+				info->nframes = sun.size;
+			}
+			info->devformat = sun2format(&sun);
+			return sun.size;
 		}
 	}
 	eputs("Unknown file format");

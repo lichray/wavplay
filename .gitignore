@@ -3,6 +3,7 @@
 *.wav
 *.aif
 *.aif[c,f]
+*.au
 *~
 wavplay
 tags
