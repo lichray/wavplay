@@ -230,10 +230,12 @@ static int sun2format(sunheader_t *sun) {
 	case 1: return WAV_FMT_MU_LAW;
 	case 2: return AIF_FMT_8;
 	case 3: return AIF_FMT_16;
-#ifdef SUN_FMT_24
+#ifdef	SUN_FMT_24
 	case 4: return SUN_FMT_24;
 #endif
+#ifdef	AIF_FMT_32
 	case 5: return AIF_FMT_32;
+#endif
 	case 27: return WAV_FMT_A_LAW;
 	default: return -1;
 	}
