@@ -1,8 +1,8 @@
 .\" Man page generated from reStructeredText.
 .
-.TH WAVPLAY 3 "2011-05-26" "0.4" ""
+.TH WAVPLAY 3 "2011-10-31" "0.4" ""
 .SH NAME
-wavplay \- a C library to play WAV sound via OSS/ALSA
+wavplay \- a C library to play wave audio files
 .
 .nr rst2man-indent-level 0
 .
@@ -62,6 +62,10 @@ If the macro \fBUSE_ALSA\fP is defined, ALSA is used instead of OSS as the backe
 The \fBsnd_init()\fP, \fBsnd_end()\fP, and \fBsnd_drop()\fP functions return a non\-negative integer if successful. The actual value is different for OSS/ALSA.
 .sp
 The \fBwav_play()\fP and \fBwav_send()\fP functions return the value 0 if the sound data was sent to the device; otherwise the value \-1 is returned.
+.SH SUPPORTED FORMATS
+.sp
+WAV (+extensible), AIFF/AIFC (+sowt), Sun Au, with 8/16/24/32 bits PCM or A\-law, mu\-law audios, are fully supported. IMA ADPCM in WAV or AIFF is also supported.
+The playback support depends on the OSS/ALSA drivers and the soundcard.
 .SH BUGS
 .sp
 The unstable support to ALSA should be removed.

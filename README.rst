@@ -3,11 +3,11 @@ wavplay
 =======
 
 -------------------------------------------
-a C library to play WAV sound via OSS/ALSA
+a C library to play wave audio files
 -------------------------------------------
 
 :Author: Zhihao Yuan <lichray@gmail.com>
-:Date:   2011-05-26
+:Date:   2011-10-31
 :Copyright: 2-clause BSD License
 :Version: 0.4
 :Manual section: 3
@@ -46,6 +46,12 @@ RETURN VALUES
 The ``snd_init()``, ``snd_end()``, and ``snd_drop()`` functions return a non-negative integer if successful. The actual value is different for OSS/ALSA.
 
 The ``wav_play()`` and ``wav_send()`` functions return the value 0 if the sound data was sent to the device; otherwise the value -1 is returned.
+
+SUPPORTED FORMATS
+==================
+
+WAV (+extensible), AIFF/AIFC (+sowt), Sun Au, with 8/16/24/32 bits PCM or A-law, mu-law audios, are fully supported. IMA ADPCM in WAV or AIFF is also supported. 
+The playback support depends on the OSS/ALSA drivers and the soundcard.
 
 BUGS
 =====
