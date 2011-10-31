@@ -13,7 +13,6 @@
 #include <sys/param.h>
 #include <netinet/in.h>
 #define BUF_SIZE	4096
-#define PERIODS	4
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
 #ifndef USE_ALSA
@@ -118,7 +117,6 @@ int snd_set(int format, int nchannels, int framerate) {
 	st |= snd_pcm_hw_params_set_format(pcm, params, format);
 	st |= snd_pcm_hw_params_set_channels(pcm, params, nchannels);
 	st |= snd_pcm_hw_params_set_rate_near(pcm, params, &val, 0);
-	st |= snd_pcm_hw_params_set_periods(pcm, params, PERIODS, 0);
 	st |= snd_pcm_hw_params(pcm, params);
 	return st;
 }
@@ -140,7 +138,7 @@ int snd_send(FILE *fp, size_t n) {
 	snd_pcm_hw_params_get_channels(params, &nchannels);
 	snd_pcm_hw_params_get_period_size(params, &period, 0);
 	int framesize = snd_pcm_format_width(format) / 8 * nchannels;
-	unsigned char buf[period * framesize];
+	unsigned char buf[period * framesize * 128];
 	size_t l;
 	while (n > sizeof(buf)) {
 		if ((l = fread(buf, 1, sizeof(buf), fp))) {
