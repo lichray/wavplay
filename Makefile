@@ -3,7 +3,6 @@
 TAGS := exctags
 PROGRAM := wavplay
 CFLAGS += -Wall -Wmissing-prototypes
-LDFLAGS += -lm
 PREFIX := /usr/local
 
 .ifdef WITH_ALSA

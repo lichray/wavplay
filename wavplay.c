@@ -10,7 +10,6 @@
 #include "wavplay.h"
 #include <string.h>
 #include <errno.h>
-#include <math.h>
 #include <sys/param.h>
 #include <netinet/in.h>
 #define BUF_SIZE	4096
@@ -283,20 +282,15 @@ static int endian2h(const char fmt[], void *p) {
 	return i - fmt;
 }
 
-static long double ext2l(extdouble_t x) {
-	int sign = 1;
-	if (x.expon < 0) {
-		sign = -1;
-		x.expon += 0x8000;
-	}
-	if (x.expon == 0 && x.expon == x.himant && x.himant == x.lomant)
-		return 0.0;
-	else if (x.expon == 0x7FFF)
-		return HUGE_VAL * sign;
-	else {
-		long double ex = pow(2.0, x.expon - 16446) * sign;
-		return (x.himant * ex * (2L << 29)) * 4 + x.lomant * ex;
-	}
+typedef union {
+	uint32_t	com[4];
+	long double	value;
+} ldouble_t;
+
+static __inline long double ext2l(extdouble_t x) {
+	return htonl(1) == 1 ?
+		(ldouble_t){{ 0, x.expon, x.himant, x.lomant }}.value :
+		(ldouble_t){{ x.lomant, x.himant, x.expon, 0 }}.value;
 }
 
 #define skip(n) do { \
