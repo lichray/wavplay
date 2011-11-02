@@ -78,7 +78,7 @@ int snd_send(FILE *fp, size_t n) {
 	if ((l = fread(buf, 1, n, fp)))
 		write(devfd, buf, l);
 	if (l < n)
-		EOS: eputs("Unexpected end of stream");
+		EOS: if (ftell(fp) > 0) eputs("Unexpected end of stream");
 	return ioctl(devfd, SNDCTL_DSP_SYNC, NULL);
 }
 
@@ -159,7 +159,7 @@ int snd_send(FILE *fp, size_t n) {
 	if ((l = fread(buf, 1, n, fp)))
 		snd_pcm_writei(pcm, buf, l / framesize);
 	if (l < n)
-		EOS: eputs("Unexpected end of stream");
+		EOS: if (ftell(fp) > 0) eputs("Unexpected end of stream");
 	return snd_pcm_drain(pcm);
 }
 
