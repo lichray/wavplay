@@ -11,7 +11,6 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/param.h>
-#include <netinet/in.h>
 #define BUF_SIZE	4096
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
@@ -248,13 +247,13 @@ static int sun2format(sunheader_t *sun) {
  *          positive value == len(fmt).
  */
 static int endian2h(const char fmt[], void *p) {
-	if (htonl(1) == 1) {
+#if BYTE_ORDER == BIG_ENDIAN
 		if (fmt[0] == '>') return 0;
 		else if (fmt[0] != '<') return -1;
-	} else {
+#else
 		if (fmt[0] == '<') return 0;
 		else if (fmt[0] != '>') return -1;
-	}
+#endif
 	const char *i = fmt;
 	while (*(++i) != '\0') {
 #define fmtInt(x, T) \
@@ -288,9 +287,13 @@ typedef union {
 } ldouble_t;
 
 static __inline long double ext2l(extdouble_t x) {
-	return htonl(1) == 1 ?
-		(ldouble_t){{ 0, x.expon, x.himant, x.lomant }}.value :
-		(ldouble_t){{ x.lomant, x.himant, x.expon, 0 }}.value;
+	return (ldouble_t)
+#if BYTE_ORDER == BIG_ENDIAN
+		{{ 0, x.expon, x.himant, x.lomant }}
+#else
+		{{ x.lomant, x.himant, x.expon, 0 }}
+#endif
+		.value;
 }
 
 #define skip(n) do { \
