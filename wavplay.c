@@ -398,7 +398,7 @@ static size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 				skip(ck.size - sizeof(ck) - sizeof(sun));
 			info->nchannels = sun.nchannels;
 			info->framerate = sun.framerate;
-			if (1 < sun.encoding || sun.encoding < 6)
+			if (1 < sun.encoding && sun.encoding < 6)
 				info->nframes = sun.size /
 					(info->sampwidth = sun.encoding - 1);
 			else {
