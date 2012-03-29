@@ -340,7 +340,7 @@ static size_t wavparse(wavheader_t *wav, FILE *fp) {
 static size_t aifparse(aifheader_t *aif, FILE *fp) {
 	riffchunk_t ck;
 	if (!read2(ck.id) || !(chkid("AIFF") || chkid("AIFC")))
-		eputs("Not a AIFF/AIFC file");
+		eputs("Not an AIFF/AIFC file");
 	else {
 		while (read2(ck)) {
 			endian2h(">l", &ck.size);
