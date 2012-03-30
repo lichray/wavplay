@@ -1,7 +1,7 @@
 /*
- * This is sample program using wavplay.
- * It plays multiple WAV files.
- * If the filename is `-', it reads from standard input.
+ * A sample program using wavplay. It can play multiple PCM files;
+ * if the filename is `-', it reads a file from the standard input.
+ * Press Ctrl-\ to drop the current playing file.
  */
 
 #include <signal.h>
