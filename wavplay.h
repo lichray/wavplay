@@ -15,8 +15,6 @@
 
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #if !defined(USE_ALSA)
 #define DEV_NAME "/dev/dsp"
 #include <fcntl.h>

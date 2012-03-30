@@ -4,11 +4,11 @@
  * If the filename is `-', it reads from standard input.
  */
 
-#include "wavplay.h"
-#include <stdio.h>
 #include <libgen.h>
-#include <string.h>
 #include <signal.h>
+#include <string.h>
+#include <unistd.h>
+#include "wavplay.h"
 
 static void main_stop(int sig) {
 #ifdef SIGQUIT
