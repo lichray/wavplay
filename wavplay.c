@@ -240,6 +240,35 @@ static int sun2format(sunheader_t *sun) {
 	}
 }
 
+#undef bswap16
+#undef bswap32
+#undef bswap64
+
+static __inline uint16_t bswap16(uint16_t x)
+{
+	return (x << 8 | x >> 8);
+}
+
+/* $NetBSD: bswap32.c,v 1.1 1997/10/09 15:42:33 bouyer Exp $ */
+
+static __inline uint32_t bswap32(uint32_t x)
+{
+	return  ((x << 24) & 0xff000000 ) |
+			((x <<  8) & 0x00ff0000 ) |
+			((x >>  8) & 0x0000ff00 ) |
+			((x >> 24) & 0x000000ff );
+}
+
+static __inline uint64_t bswap64(uint64_t x)
+{  
+	uint32_t *p = (void*)&x;
+	uint32_t t;
+	t = bswap32(p[0]);
+	p[0] = bswap32(p[1]);
+	p[1] = t;
+	return x;
+}
+
 /*
  * converts any endianess to host
  * returns -1 when format is wrong,
