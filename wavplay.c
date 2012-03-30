@@ -14,6 +14,19 @@
 #include <unistd.h>
 #include "wavplay.h"
 
+#if !defined(USE_ALSA)
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+#include <soundcard.h>
+#else
+#include <sys/soundcard.h>
+#endif
+#else
+#define ALSA_PCM_NEW_HW_PARAMS_API
+#include <alsa/asoundlib.h>
+#endif
+
 #define BUF_SIZE	4096
 #define eputs(s) (fprintf(stderr, "%s: " s "\n", __func__))
 
