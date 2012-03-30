@@ -10,12 +10,12 @@
 #include <unistd.h>
 #include "wavplay.h"
 
-static void main_stop(int sig) {
 #ifdef SIGQUIT
+static void drop(int sig) {
 	if (sig == SIGQUIT)
 		snd_drop();
-#endif
 }
+#endif
 
 int main(int argc, char *argv[]) {
 	char *prog = basename(argv[0]);
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 #ifdef SIGQUIT
-	signal(SIGQUIT, main_stop);
+	signal(SIGQUIT, drop);
 #endif
 	int i = 1;
 	while (1) {
