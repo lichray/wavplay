@@ -68,9 +68,9 @@ typedef struct _sunheader {
 } __attribute__((__packed__)) sunheader_t;
 
 typedef struct _wav_info {
-	short	nchannels;
+	int	nchannels;
 	int	nframes;
-	short	sampwidth;
+	int	sampwidth;
 	int	framerate;
 	int	devformat;
 } wav_info_t;
