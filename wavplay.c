@@ -84,9 +84,10 @@ int snd_send(FILE *fp, size_t n) {
 	unsigned char buf[BUF_SIZE];
 	size_t l;
 	while (n > sizeof(buf)) {
-		if ((l = fread(buf, 1, sizeof(buf), fp)))
-			if (write(devfd, buf, l) < 0) return -1;
-			else;
+		if ((l = fread(buf, 1, sizeof(buf), fp))) {
+			if (write(devfd, buf, l) < 0)
+				return -1;
+		}
 		else goto EOS;
 		n -= l;
 	}
@@ -393,7 +394,7 @@ static size_t aifparse(aifheader_t *aif, FILE *fp) {
 				return ck.size;
 			ck.size = (ck.size + 1) / 2 * 2;
 			if (chkid("COMM")) {
-				int ckl = MIN(ck.size, sizeof(aifheader_t));
+				size_t ckl = MIN(ck.size, sizeof(aifheader_t));
 				fread(aif, ckl, 1, fp);
 				if (ckl < (sizeof(aifheader_t) - sizeof(aif->comptype)))
 					eputs("Bad common chunk");
@@ -422,7 +423,7 @@ static size_t wav_readinfo(wav_info_t *info, FILE *fp) {
 			return sz;
 		}
 		else if (chkid("FORM")) {
-			aifheader_t aif[1] = {{ 0 }};
+			aifheader_t aif[1] = {{ .comptype = "" }};
 			size_t sz = aifparse(aif, fp);
 			endian2h(">hlhhll", aif);
 			info->nchannels = aif->nchannels;
