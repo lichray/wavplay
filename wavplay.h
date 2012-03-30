@@ -4,8 +4,8 @@
 /*-
  * wavplay - a C library to play WAV sound via OSS/ALSA
  *
- * Copyright (c) 2011 Zhihao Yuan.
- * All rights reserved.
+ * Copyright (c) 2011, 2012
+ * Zhihao Yuan.  All rights reserved.
  *
  * Reference:
  * http://www.freshports.org/audio/waveplay/
