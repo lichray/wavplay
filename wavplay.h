@@ -33,7 +33,7 @@
 #endif
 
 typedef struct _riffchunk {
-	char	id[4];
+	char		id[4];
 	uint32_t	size;
 } riffchunk_t;
 
@@ -47,24 +47,24 @@ typedef struct _wavheader {
 } wavheader_t;
 
 typedef struct _extdouble {
-	int16_t	expon;
+	int16_t		expon;
 	uint32_t	himant;
 	uint32_t	lomant;
 } __attribute__((__packed__)) extdouble_t;
 
 typedef struct _aifheader {
-	int16_t	nchannels;
-	int32_t	nframes;
-	int16_t	bitdepth;
+	int16_t		nchannels;
+	int32_t		nframes;
+	int16_t		bitdepth;
 	extdouble_t	framerate;
-	char	comptype[4];
+	char		comptype[4];
 } __attribute__((__packed__)) aifheader_t;
 
 typedef struct _sunheader {
 	uint32_t	size;
-	int32_t	encoding;
-	int32_t	framerate;
-	int32_t	nchannels;
+	int32_t		encoding;
+	int32_t		framerate;
+	int32_t		nchannels;
 } __attribute__((__packed__)) sunheader_t;
 
 typedef struct _wav_info {
@@ -84,10 +84,10 @@ int wav_send(FILE *stream);
 
 int snd_init(void);
 int snd_set(int format, /* OSS/ALSA format constant */
-	    int nchannels,
-	    int framerate);
+            int nchannels,
+            int framerate);
 int snd_send(FILE *stream,
-	     size_t size);
+             size_t size);
 int snd_drop(void);
 int snd_end(void);
 
