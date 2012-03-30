@@ -4,7 +4,6 @@
  * If the filename is `-', it reads from standard input.
  */
 
-#include <libgen.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
@@ -18,7 +17,7 @@ static void drop(int sig) {
 #endif
 
 int main(int argc, char *argv[]) {
-	char *prog = basename(argv[0]);
+	char *prog = argv[0];
 	if (argc < 2) {
 		printf("Usage: %s [FILE|-]...\n", prog);
 		return 1;
